@@ -1,0 +1,90 @@
+name: "Vigil Security Scan"
+description: "Open-source security scanner for AI agents, LLM apps & websites (prompt injection, MCP, secrets, Indian PII/DPDP)."
+author: "Vigil"
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  target:
+    description: "Target to scan (URL or local path). Defaults to the repo root."
+    required: false
+    default: "."
+  ai-endpoint:
+    description: "Optional LLM endpoint to probe for direct prompt injection."
+    required: false
+  ai-indirect-endpoint:
+    description: "Optional LLM endpoint to probe for INDIRECT prompt injection (poisoned retrieved content)."
+    required: false
+  mcp-url:
+    description: "Optional deployed MCP server URL to test for no-auth exposure + tool poisoning."
+    required: false
+  mcp-discover:
+    description: "Set 'true' to discover & flag risky local MCP configs."
+    required: false
+    default: "false"
+  only:
+    description: "Comma-separated scanner ids to run (web,content,secrets,pii,ai,ai-indirect,mcp,mcp-discover)."
+    required: false
+  fail-on:
+    description: "Exit with non-zero if any finding >= this severity (critical|high|medium|low)."
+    required: false
+    default: "high"
+  upload-sarif:
+    description: "Upload SARIF to GitHub code-scanning (requires security-events: write)."
+    required: false
+    default: "true"
+  sarif-file:
+    description: "Path for the SARIF output file."
+    required: false
+    default: "vigil.sarif"
+
+outputs:
+  sarif-file:
+    description: "Path to the generated SARIF report."
+    value: ${{ inputs.sarif-file }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Run Vigil
+      shell: bash
+      env:
+        VIGIL_TARGET: ${{ inputs.target }}
+        VIGIL_AI: ${{ inputs.ai-endpoint }}
+        VIGIL_AI_INDIRECT: ${{ inputs.ai-indirect-endpoint }}
+        VIGIL_MCP: ${{ inputs.mcp-url }}
+        VIGIL_DISCOVER: ${{ inputs.mcp-discover }}
+        VIGIL_ONLY: ${{ inputs.only }}
+        VIGIL_FAIL_ON: ${{ inputs.fail-on }}
+        VIGIL_SARIF: ${{ inputs.sarif-file }}
+      run: |
+        set -e
+        ARGS=("scan" "$VIGIL_TARGET")
+        [ -n "$VIGIL_AI" ]          && ARGS+=("--ai" "$VIGIL_AI")
+        [ -n "$VIGIL_AI_INDIRECT" ] && ARGS+=("--ai-indirect" "$VIGIL_AI_INDIRECT")
+        [ -n "$VIGIL_MCP" ]         && ARGS+=("--mcp" "$VIGIL_MCP")
+        [ "$VIGIL_DISCOVER" = "true" ] && ARGS+=("--mcp-discover")
+        [ -n "$VIGIL_ONLY" ]        && ARGS+=("--only" "$VIGIL_ONLY")
+        [ -n "$VIGIL_FAIL_ON" ]     && ARGS+=("--fail-on" "$VIGIL_FAIL_ON")
+
+        # Human-readable run (always shown in the job log; never fails the step on its own)
+        npx -y vigil "${ARGS[@]}" || true
+
+        # SARIF run (the actual gate — exits non-zero per --fail-on)
+        npx -y vigil "${ARGS[@]}" --sarif > "$VIGIL_SARIF"
+        VIGIL_EXIT=$?
+        echo "vigil-exit=$VIGIL_EXIT" >> "$GITHUB_OUTPUT" || true
+        exit $VIGIL_EXIT
+
+    - name: Upload SARIF to GitHub code-scanning
+      if: always() && inputs.upload-sarif == 'true'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-file }}
+        category: vigil

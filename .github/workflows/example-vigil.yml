@@ -1,0 +1,27 @@
+name: Vigil example
+
+# This is a SAMPLE workflow showing how third-party repos consume the Vigil
+# action once it's published. In this repo's own CI it runs against itself.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF to code-scanning
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Vigil
+        # When published, replace with: uses: your-org/vigil@v0
+        uses: ./
+        with:
+          target: "."
+          fail-on: "high"
+          only: "web,content,secrets,pii"
+          upload-sarif: "true"
