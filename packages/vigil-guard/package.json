@@ -1,0 +1,16 @@
+{
+  "name": "@starvoxlabs/vigil-guard",
+  "version": "0.1.0",
+  "description": "Runtime AI security guard — inline Express/Next middleware that blocks prompt injection, redacts Indian PII (DPDP), decodes invisible-Unicode smuggling, and firewalls MCP tool calls. Zero dependencies.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./express": "./src/express.js",
+    "./next": "./src/next.js"
+  },
+  "keywords": ["ai-security", "llm-security", "prompt-injection", "guardrails", "middleware", "express", "next", "dpdp", "aadhaar", "mcp", "runtime", "llm01"],
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "files": ["src", "README.md", "LICENSE"]
+}
