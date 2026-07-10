@@ -1,5 +1,5 @@
 import { SCANNERS, byId } from "./scanners/index.js";
-import { printReport, jsonReport, sarifReport } from "./report.js";
+import { printReport, jsonReport, sarifReport, htmlReport } from "./report.js";
 import { c } from "./util.js";
 
 const HELP = `
@@ -24,6 +24,7 @@ ${c.bold("OPTIONS")}
   --only <ids>           Comma-separated scanner ids (see 'vigil list')
   --json                 Machine-readable output (for CI/CD)
   --sarif                SARIF 2.1.0 output (GitHub code-scanning)
+  --html                 Shareable "report card" — graded, with a lesson per finding
   --fail-on <sev>        Exit non-zero if a finding >= severity (critical|high|medium|low)
   -h, --help             Show this help
 
@@ -44,6 +45,7 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === "--json") opts.json = true;
     else if (a === "--sarif") opts.sarif = true;
+    else if (a === "--html") opts.html = true;
     else if (a === "--ai") opts.aiEndpoint = argv[++i];
     else if (a === "--ai-indirect") opts.aiIndirect = argv[++i];
     else if (a === "--ai-field") opts.aiField = argv[++i];
@@ -97,7 +99,8 @@ export async function main(argv) {
   const scanners = selectScanners(target, opts);
   if (scanners.length === 0) { console.log(c.yellow("No scanners matched this target. Try --only or --help.")); return 1; }
 
-  if (!opts.json) console.log(c.gray(`\n  Running: ${scanners.map((s) => s.meta.id).join(", ")}`));
+  const quiet = opts.json || opts.sarif || opts.html;
+  if (!quiet) console.log(c.gray(`\n  Running: ${scanners.map((s) => s.meta.id).join(", ")}`));
 
   const results = [];
   for (const s of scanners) {
@@ -111,6 +114,7 @@ export async function main(argv) {
 
   if (opts.sarif) console.log(sarifReport(target, results));
   else if (opts.json) console.log(jsonReport(target, results));
+  else if (opts.html) console.log(htmlReport(target, results, opts));
   else printReport(target, results);
 
   if (opts.failOn) {

@@ -76,7 +76,10 @@ export async function run(target) {
           : "Invisible characters can smuggle instructions to an AI reader.",
         evidence: inv.name,
         owasp: "LLM01:2025",
-        fix: "Strip non-printable/tag/zero-width/bidi Unicode from any content before an LLM reads it.",
+        fix: "Strip non-printable / tag / zero-width / bidi Unicode from any content before an LLM reads it.\n# runtime guard: @starvoxlabs89-design/vigil-guard decodes + blocks this inline",
+        attack: "These characters are invisible to a human reviewer but readable by a model. An attacker smuggles a command into a page, doc, or PR — your AI reads and obeys it while you see nothing wrong.",
+        learn: "This is the GlassWorm-class vector: instructions hidden in Unicode that supply-chain matchers document but can't detect. You have to actually decode the bytes to see the payload.",
+        learnUrl: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       }));
     }
   }
@@ -92,7 +95,10 @@ export async function run(target) {
         detail: "Instruction-like text aimed at an assistant is concealed in a comment or hidden element.",
         evidence: (hidden.match(re)?.[0] || "").slice(0, 80),
         owasp: "LLM01:2025",
-        fix: "Sanitize HTML comments/hidden nodes from agent-ingested content; render to plain text first.",
+        fix: "Sanitize HTML comments / hidden nodes from agent-ingested content; render to plain text first.\n# treat all retrieved content as DATA, never as instructions",
+        attack: "When your support bot — or a user's ChatGPT/Claude — reads this page, it can obey the hidden comment as if it were a command: leak the system prompt, phish the user, or call a tool. The attacker never touches your server; they poison the content your AI trusts.",
+        learn: "Indirect prompt injection: the model can't tell your instructions from text it was asked to read. It's #1 on the OWASP LLM Top 10 two years running.",
+        learnUrl: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       }));
       break;
     }

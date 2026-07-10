@@ -28,11 +28,32 @@ function verhoeffValid(num) {
   return c === 0;
 }
 
+const DPDP_URL = "https://www.meity.gov.in/data-protection-framework";
 const PATTERNS = [
-  { id: "aadhaar", sev: "critical", title: "Aadhaar number", re: /\b[2-9][0-9]{3}\s?[0-9]{4}\s?[0-9]{4}\b/g, validate: verhoeffValid, dpdp: "sensitive-identifier" },
-  { id: "pan", sev: "high", title: "PAN (Permanent Account Number)", re: /\b[A-Z]{5}[0-9]{4}[A-Z]\b/g, dpdp: "financial-identifier" },
-  { id: "phone-in", sev: "medium", title: "Indian mobile number", re: /\b(?:\+?91[\-\s]?)?[6-9][0-9]{9}\b/g, dpdp: "contact-data" },
-  { id: "email", sev: "low", title: "Email address", re: /\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b/g, dpdp: "contact-data" },
+  {
+    id: "aadhaar", sev: "critical", title: "Aadhaar number", re: /\b[2-9][0-9]{3}\s?[0-9]{4}\s?[0-9]{4}\b/g, validate: verhoeffValid, dpdp: "sensitive-identifier",
+    attack: "A valid Aadhaar in code or logs is a reportable personal-data breach the moment those logs ship to a dashboard, a backup, or a third party. It links to biometrics and can't be reissued like a password.",
+    learn: "Aadhaar is among the most sensitive identifiers under Indian law. Logs and fixtures are the surface teams forget — data-at-rest scanners never look there.",
+    learnUrl: DPDP_URL,
+  },
+  {
+    id: "pan", sev: "high", title: "PAN (Permanent Account Number)", re: /\b[A-Z]{5}[0-9]{4}[A-Z]\b/g, dpdp: "financial-identifier",
+    attack: "A PAN ties a person to their tax and financial identity. Leaked alongside a name it's enough to seed identity fraud and phishing.",
+    learn: "Financial identifiers demand encryption at rest and strict access — don't let them sit in plaintext source or logs.",
+    learnUrl: DPDP_URL,
+  },
+  {
+    id: "phone-in", sev: "medium", title: "Indian mobile number", re: /\b(?:\+?91[\-\s]?)?[6-9][0-9]{9}\b/g, dpdp: "contact-data",
+    attack: "Bulk phone numbers in a repo become a spam/SIM-swap/OTP-phishing list the day the repo leaks.",
+    learn: "Contact data is still personal data under DPDP — minimize what you store and never hardcode real numbers in fixtures.",
+    learnUrl: DPDP_URL,
+  },
+  {
+    id: "email", sev: "low", title: "Email address", re: /\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b/g, dpdp: "contact-data",
+    attack: "Real user emails in source feed phishing and credential-stuffing lists if the code is ever exposed.",
+    learn: "Use example.com / placeholder addresses in code and tests; keep real contact data out of the repo.",
+    learnUrl: DPDP_URL,
+  },
 ];
 
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".next", "vendor", "__pycache__"]);
@@ -75,7 +96,8 @@ export async function run(target) {
           id: `pii-${pat.id}`, title: pat.title, severity: pat.sev,
           detail: `${file}`, evidence: val.slice(0, 4) + "…" + val.slice(-2),
           dpdp: pat.dpdp,
-          fix: "Remove from source/logs; store encrypted; minimize & set retention per DPDP.",
+          fix: "Remove from source/logs; redact before logging; store encrypted; minimize & set a retention window per DPDP.",
+          attack: pat.attack, learn: pat.learn, learnUrl: pat.learnUrl,
         }));
       }
     }

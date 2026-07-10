@@ -60,7 +60,11 @@ export async function run(target) {
             id: `secret-${pat.id}`, title: pat.title, severity: pat.sev,
             detail: `${file}:${i + 1}`,
             evidence: m[0].slice(0, 12) + "…",
-            owasp: "OWASP-Web", fix: "Rotate immediately and move to a secret manager / env var.",
+            owasp: "OWASP-Web",
+            fix: "# 1. rotate the key at the provider (this one is now burned)\n# 2. move it to an env var / secret manager, never in code\n# 3. purge it from git history (git-filter-repo / BFG)",
+            attack: `Anyone who reads this file — a leaked repo, a shipped bundle, a former employee — has a live ${pat.title.replace(/ API key| token| block/i, "")} credential. Committing to git means it lives in history even after you delete the line.`,
+            learn: "A secret that has touched source control is compromised — rotate first, then remove. Scrubbing the line without rotating does nothing.",
+            learnUrl: "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html",
           }));
         }
       }
