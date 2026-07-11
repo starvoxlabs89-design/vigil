@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaali — sign in</title>
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#11151c; --panel2:#161b24; --line:#222a36;
+    --text:#e6edf3; --dim:#8b97a6; --accent:#5eead4; --accent2:#38bdf8;
+    --crit:#f87171; --ok:#34d399;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(900px 500px at 70% -10%,#101826 0,var(--bg) 55%);
+    color:var(--text);font-family:Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:460px;margin:0 auto;padding:80px 24px 40px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.2px;margin-bottom:36px}
+  .brand .dot{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;color:#04201c;font-size:15px}
+  h1{font-size:28px;line-height:1.15;margin:0 0 8px;letter-spacing:-.01em}
+  h1 .grad{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--dim);font-size:15px;margin-bottom:26px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:16px;padding:24px;box-shadow:0 24px 60px -30px #000}
+  label{display:block;font-size:13px;color:var(--dim);margin:12px 0 6px}
+  input{width:100%;background:#0b0e13;border:1px solid var(--line);border-radius:10px;
+    color:var(--text);font-family:inherit;font-size:14px;padding:11px 12px}
+  input:focus{outline:none;border-color:var(--accent2)}
+  .row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);margin-top:14px;line-height:1.5}
+  .row a{color:var(--accent2);text-decoration:none}
+  button{margin-top:16px;width:100%;font:inherit;font-weight:600;border-radius:10px;padding:12px;
+    border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04201c;cursor:pointer}
+  button:hover{filter:brightness(1.08)}
+  button:disabled{opacity:.55;cursor:wait}
+  .tab{display:flex;gap:4px;padding:4px;background:#0b0e13;border:1px solid var(--line);border-radius:12px;margin-bottom:18px}
+  .tab button{margin:0;background:transparent;color:var(--dim);border-radius:8px;padding:9px;font-weight:500}
+  .tab button.on{background:var(--panel2);color:var(--text)}
+  .msg{margin-top:12px;font-size:13px;padding:10px 12px;border-radius:8px;border:1px solid var(--line)}
+  .msg.err{color:var(--crit);background:#1a0e10;border-color:#3a1414}
+  .msg.ok{color:var(--ok);background:#06140f;border-color:#0e2a1c}
+  .foot{margin-top:22px;color:var(--dim);font-size:12px;text-align:center;line-height:1.6}
+  .foot a{color:var(--dim);text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot">॥</span> Kaali</div>
+  <h1>Watch what your <span class="grad">AI reads and says.</span></h1>
+  <div class="sub">Open-source security for AI agents & apps. Sign in to see your scans and monitor targets 24/7.</div>
+
+  <div class="card">
+    <div class="tab" role="tablist">
+      <button id="tabLogin"  class="on">Sign in</button>
+      <button id="tabSignup">Create account</button>
+    </div>
+
+    <form id="form" novalidate>
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" required placeholder="you@company.in" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required minlength="8" placeholder="min 8 characters" />
+
+      <div id="consentRow" class="row" style="display:none">
+        <input id="consent" type="checkbox" style="width:auto" />
+        <label for="consent" style="margin:0">I agree to the <a href="/privacy.html">Privacy Policy</a> and consent to data processing under DPDP.</label>
+      </div>
+
+      <button id="submit" type="submit">Sign in</button>
+      <div id="msg"></div>
+    </form>
+
+    <div class="row" id="forgotRow">
+      <a href="#" id="forgotLink">Forgot password?</a>
+    </div>
+  </div>
+
+  <div class="foot">
+    Kaali is open source (MIT). <a href="https://github.com/starvoxlabs89-design/kaali">GitHub</a> ·
+    <a href="/privacy.html">Privacy</a> · <a href="mailto:hello@kaali.io">hello@kaali.io</a>
+  </div>
+</div>
+
+<script>
+const API = window.KAALI_API_URL || "";  // same-origin by default
+let mode = "login";
+const $ = id => document.getElementById(id);
+
+function setMode(m){
+  mode = m;
+  $('tabLogin').classList.toggle('on', m==='login');
+  $('tabSignup').classList.toggle('on', m==='signup');
+  $('submit').textContent = m==='login' ? 'Sign in' : 'Create account';
+  $('consentRow').style.display = m==='signup' ? 'flex' : 'none';
+  $('password').autocomplete = m==='login' ? 'current-password' : 'new-password';
+  $('forgotRow').style.display = m==='login' ? 'flex' : 'none';
+  $('msg').innerHTML = '';
+}
+$('tabLogin').onclick = () => setMode('login');
+$('tabSignup').onclick = () => setMode('signup');
+
+function showMsg(kind, text){ $('msg').innerHTML = `<div class="msg ${kind}">${text}</div>`; }
+
+// Success ping if user just verified via email link
+if (new URLSearchParams(location.search).get('verified') === '1'){
+  showMsg('ok', 'Email verified. Sign in below.');
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  const btn = $('submit'); btn.disabled = true;
+  try {
+    if (mode === 'signup'){
+      if (!$('consent').checked){ showMsg('err','Please accept the privacy policy.'); return; }
+      const r = await fetch(`${API}/auth/signup`, {
+        method:'POST', credentials:'include', headers:{'content-type':'application/json'},
+        body: JSON.stringify({ email, password, consent:true }),
+      });
+      const j = await r.json().catch(()=>({}));
+      if (!r.ok) return showMsg('err', j.error || 'Sign-up failed');
+      showMsg('ok', 'Check your email for a verification link.');
+    } else {
+      const r = await fetch(`${API}/auth/login`, {
+        method:'POST', credentials:'include', headers:{'content-type':'application/json'},
+        body: JSON.stringify({ email, password }),
+      });
+      const j = await r.json().catch(()=>({}));
+      if (!r.ok) return showMsg('err', j.error || 'Sign-in failed');
+      location.href = '/dashboard.html';
+    }
+  } catch (err){
+    showMsg('err', 'Network error');
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$('forgotLink').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const email = $('email').value.trim();
+  if (!email){ showMsg('err','Enter your email above first, then click Forgot.'); return; }
+  const r = await fetch(`${API}/auth/forgot`, {
+    method:'POST', credentials:'include', headers:{'content-type':'application/json'},
+    body: JSON.stringify({ email }),
+  });
+  if (r.ok) showMsg('ok', 'If that address exists, a reset link is on its way.');
+});
+</script>
+</body>
+</html>

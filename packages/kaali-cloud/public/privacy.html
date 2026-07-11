@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaali — Privacy Policy</title>
+<style>
+  body{margin:0;background:#0a0c10;color:#e6edf3;font-family:Inter,system-ui,sans-serif;line-height:1.65}
+  main{max-width:720px;margin:0 auto;padding:60px 24px}
+  h1{font-size:28px;margin:0 0 6px}
+  h2{font-size:18px;margin-top:28px}
+  .dim{color:#8b97a6;font-size:14px;margin-bottom:24px}
+  a{color:#38bdf8}
+  code{background:#11151c;border:1px solid #222a36;padding:1px 6px;border-radius:6px;font-size:13px;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy Policy</h1>
+  <div class="dim">Version v1-2026-07 · Kaali is a product of Starvox Labs Pvt Ltd, Mumbai, India.</div>
+
+  <h2>What we collect</h2>
+  <p><strong>Account data.</strong> Email, hashed password (scrypt, never plaintext), account activity timestamps.</p>
+  <p><strong>Events.</strong> Scan results and guard events you send us via API key, including finding types, severity, target URLs/paths, and timestamps. You control which events you send.</p>
+  <p><strong>Technical.</strong> IP address and user agent for auth actions and rate limiting.</p>
+
+  <h2>What we do NOT collect</h2>
+  <p>We do not receive raw prompts, LLM inputs/outputs, or the content the Kaali scanner reads — only the findings and metadata you choose to stream. The Kaali OSS scanner (<code>@kaali/cli</code>) and guard (<code>@kaali/guard</code>) run entirely on your infrastructure; nothing leaves your machine unless you configure it to.</p>
+
+  <h2>Legal basis (DPDP Act, 2023)</h2>
+  <p>We process your data under §6 consent for account creation and product use, and §7 legitimate use for security abuse detection. You may withdraw consent and request erasure at any time from your <a href="/dashboard.html">dashboard</a> (§12 right to erasure), or by emailing <a href="mailto:privacy@kaali.io">privacy@kaali.io</a>.</p>
+
+  <h2>Data location & retention</h2>
+  <p>Personal data is stored on servers in Mumbai, India. Event data is retained for 12 months by default; you can delete individual events or wipe your account at any time. On account deletion, all data cascades within 30 days.</p>
+
+  <h2>Third parties</h2>
+  <p>We use <strong>Resend</strong> to deliver transactional email (verification, password reset). We do not share your data with anyone else.</p>
+
+  <h2>Your rights (DPDP §§11–14)</h2>
+  <p>Access, correction, erasure, and grievance. Contact <a href="mailto:privacy@kaali.io">privacy@kaali.io</a>. Data Protection Officer: to be appointed on public launch.</p>
+
+  <h2>Changes</h2>
+  <p>Material changes will be emailed to registered users at least 14 days before they take effect.</p>
+
+  <div class="dim" style="margin-top:36px"><a href="/">← Back to sign in</a></div>
+</main>
+</body>
+</html>

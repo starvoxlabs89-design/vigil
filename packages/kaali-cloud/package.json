@@ -1,0 +1,17 @@
+{
+  "name": "@kaali/cloud",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kaali Cloud — auth + dashboard + event ingestion for kaali.io. Node HTTP + Postgres. DPDP-ready.",
+  "type": "module",
+  "main": "./src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "migrate": "node src/migrate.js",
+    "test": "node src/test.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "pg": "^8.11.0"
+  }
+}

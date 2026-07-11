@@ -1,0 +1,26 @@
+# /etc/systemd/system/kaali-cloud.service
+# Install:  scp deploy/kaali-cloud.service root@vps:/etc/systemd/system/
+#           systemctl daemon-reload && systemctl enable --now kaali-cloud
+[Unit]
+Description=Kaali Cloud API (api.kaali.io)
+After=network.target postgresql.service
+Requires=network.target
+
+[Service]
+Type=simple
+User=kaali
+WorkingDirectory=/opt/kaali/kaali-cloud
+EnvironmentFile=/opt/kaali/kaali-cloud/.env
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/kaali/kaali-cloud
+
+[Install]
+WantedBy=multi-user.target
