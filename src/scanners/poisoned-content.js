@@ -76,7 +76,7 @@ export async function run(target) {
           : "Invisible characters can smuggle instructions to an AI reader.",
         evidence: inv.name,
         owasp: "LLM01:2025",
-        fix: "Strip non-printable / tag / zero-width / bidi Unicode from any content before an LLM reads it.\n# runtime guard: @starvoxlabs89-design/vigil-guard decodes + blocks this inline",
+        fix: "Strip non-printable / tag / zero-width / bidi Unicode from any content before an LLM reads it.\n# runtime guard: @kaali/guard decodes + blocks this inline",
         attack: "These characters are invisible to a human reviewer but readable by a model. An attacker smuggles a command into a page, doc, or PR — your AI reads and obeys it while you see nothing wrong.",
         learn: "This is the GlassWorm-class vector: instructions hidden in Unicode that supply-chain matchers document but can't detect. You have to actually decode the bytes to see the payload.",
         learnUrl: "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",

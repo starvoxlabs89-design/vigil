@@ -1,4 +1,4 @@
-# Vigil — Launch Kit
+# Kaali — Launch Kit
 
 > Copy-paste assets for launch day. Voice: sharp-operator (human, no listicles, no AI avatars). Anchor channels: GitHub + X + LinkedIn + Hacker News. Reels = repurposed clips only, never the origin.
 
@@ -6,11 +6,11 @@
 
 ## 0. Pre-launch checklist (the blockers, in order)
 
-1. **Lock the name.** "vigil" is likely taken on npm + GitHub. Decide the brand architecture: **Starvox Labs** (house) → **Praman** (flagship) → the scanner is the OSS engine. Check npm + GitHub org + trademark before publishing. Candidate package names if Praman/Vigil collide: `@starvoxlabs89-design/vigil`, `praman`, `praman-scan`, `vigilscan`.
+1. **Lock the name.** "kaali" is likely taken on npm + GitHub. Decide the brand architecture: **Starvox Labs** (house) → **Praman** (flagship) → the scanner is the OSS engine. Check npm + GitHub org + trademark before publishing. Candidate package names if Praman/Kaali collide: `@kaali/cli`, `praman`, `praman-scan`, `kaaliscan`.
 2. **Publish to npm** under the locked name (scoped `@starvoxlabs89-design/*` is always available). Until this is done, `npx <name>` in the README is a broken promise.
 3. **Public GitHub repo** under the org, with README, LICENSE, SPEC, a pinned good-first-issues list, and the GitHub Action (`action.yml`) referenced.
 4. **Record a 20–30s demo** (asciinema or a terminal GIF): `npx <name> scan https://…` → scary score. Embed at top of README + use in every post.
-5. **Landing page** at starvoxlabs.io: one screen — the one-command demo, the Vigil Score, "secure the AI you ship," GitHub + Cloud-waitlist CTAs.
+5. **Landing page** at starvoxlabs.io: one screen — the one-command demo, the Kaali Score, "secure the AI you ship," GitHub + Cloud-waitlist CTAs.
 6. **Cloud waitlist** live (email capture) so launch traffic converts to pipeline.
 
 ---
@@ -18,11 +18,11 @@
 ## 1. Hacker News — "Show HN"
 
 **Title:**
-`Show HN: Vigil – open-source security scanner for AI apps, agents and MCP servers`
+`Show HN: Kaali – open-source security scanner for AI apps, agents and MCP servers`
 
 **Body:**
 ```
-Hi HN — I built Vigil because everyone's shipping LLM apps and AI agents, and
+Hi HN — I built Kaali because everyone's shipping LLM apps and AI agents, and
 almost no one is scanning them for the AI-specific stuff: prompt injection,
 exposed/poisoned MCP servers, hidden-Unicode instructions in retrieved content,
 and PII (incl. Indian Aadhaar/PAN) leaking through code, logs and LLM output.
@@ -40,8 +40,8 @@ It's zero-dependency (pure Node 20+), MIT, and emits a 0–100 score + severity-
 findings with fixes, plus --json/--fail-on for CI.
 
 What it does NOT do (I'm not overclaiming): it's not an SCA/SAST tool (use Trivy/Socket),
-not the "first DPDP PII scanner" (KavachOne et al. own data-at-rest PII — Vigil covers
-the AI/app layer they don't), and not the first runtime AI security (Lakera exists — Vigil
+not the "first DPDP PII scanner" (KavachOne et al. own data-at-rest PII — Kaali covers
+the AI/app layer they don't), and not the first runtime AI security (Lakera exists — Kaali
 is the open-source, dev-first one). The wedge is the intersection: OSS + dev-first +
 runtime AI/agent + deployed-MCP + DPDP evidence for the app itself.
 
@@ -59,7 +59,7 @@ Repo: <github url>   |   Would love feedback on the scanner design and false-pos
 **1/**
 Everyone's shipping AI agents. Almost no one is scanning them for the ways they actually leak.
 
-So I built Vigil — open-source security scanner for the AI you ship. One command:
+So I built Kaali — open-source security scanner for the AI you ship. One command:
 
 `npx <name> scan https://your-app.com`
 
@@ -69,17 +69,17 @@ No install. No account. 🧵
 The observability tools (Langfuse, OpenLIT) watch cost & quality.
 They're blind to security.
 
-Vigil watches the security layer: prompt injection, exposed MCP servers, hidden-Unicode instructions, secrets, and PII in your code/logs/LLM output.
+Kaali watches the security layer: prompt injection, exposed MCP servers, hidden-Unicode instructions, secrets, and PII in your code/logs/LLM output.
 
 **3/**
 The AI-security OSS leaders got acquired into big closed platforms in 2025 (Protect AI, Lakera, CalypsoAI).
 
-The free, developer-first lane is empty. Vigil fills it. MIT. Zero-dependency. Pure Node.
+The free, developer-first lane is empty. Kaali fills it. MIT. Zero-dependency. Pure Node.
 
 **4/**
 🇮🇳 The India twist: it catches Aadhaar (Verhoeff-validated) + PAN leaking through your AI layer and maps it to the DPDP Act — penalties up to ₹250 crore, enforcement 2027.
 
-Data-at-rest scanners never look at your code, logs, or LLM output. Vigil does.
+Data-at-rest scanners never look at your code, logs, or LLM output. Kaali does.
 
 **5/**
 8 scanners, one command:
@@ -118,7 +118,7 @@ enforcement 2027) will hold them accountable for.
 The tools that watch this either went closed and enterprise-priced, or only scan
 databases at rest — never the AI app itself.
 
-So we open-sourced Vigil: a free, one-command security scanner for the AI you ship.
+So we open-sourced Kaali: a free, one-command security scanner for the AI you ship.
 `npx <name> scan https://your-app.com` → a score and a fix list in seconds.
 
 A hosted tier with 24/7 monitoring and an auditor-ready DPDP / ISO-42001 evidence
@@ -135,13 +135,13 @@ Repo + waitlist 👇
 
 ## 4. The launch-amplifier: the vulnerability-scan REPORT
 
-This is the content flywheel — the artifact that makes press + investors notice. Run Vigil across a real, public, *authorized-scope* sample and publish the aggregate (anonymized) findings.
+This is the content flywheel — the artifact that makes press + investors notice. Run Kaali across a real, public, *authorized-scope* sample and publish the aggregate (anonymized) findings.
 
 **Working title:** *"The State of AI App Security in India — what we found scanning 1,000 public sites & AI apps"*
 
 **Outline:**
 1. **Why we looked** — AI apps everywhere, security tooling blind, DPDP clock ticking.
-2. **Method** — what Vigil scanned (public posture only: headers/TLS, exposed secrets in client JS, invisible-Unicode, publicly reachable MCP endpoints), sample size, anonymized, scope/ethics note (only externally observable, no exploitation).
+2. **Method** — what Kaali scanned (public posture only: headers/TLS, exposed secrets in client JS, invisible-Unicode, publicly reachable MCP endpoints), sample size, anonymized, scope/ethics note (only externally observable, no exploitation).
 3. **Headline findings** — the screenshot-able stats: *X% missing CSP/HSTS · Y% leak an API key or PAN in client JS · Z exposed MCP servers with no auth · N pages carrying hidden-Unicode instructions.*
 4. **The DPDP angle** — how many would fail a DPDP exposure check, translated to ₹-risk.
 5. **The five fixes** — concrete, so it's useful, not just scary.
@@ -159,5 +159,5 @@ This is the content flywheel — the artifact that makes press + investors notic
 - **X:** "injection of the week" — one real finding, in operator voice.
 - **LinkedIn:** weekly long-form for buyers (CISO/gov/risk).
 - **GitHub:** ship visibly — close issues, merge community scanner PRs, public roadmap.
-- **Integrations as distribution:** a GitHub Action, a Bumblebee-interop story ("Bumblebee tells you which MCP servers you have; Vigil tells you which are dangerous"), SARIF for code-scanning.
+- **Integrations as distribution:** a GitHub Action, a Bumblebee-interop story ("Bumblebee tells you which MCP servers you have; Kaali tells you which are dangerous"), SARIF for code-scanning.
 - **Reels:** only as 30s repurposed clips of the above. Never the origin.

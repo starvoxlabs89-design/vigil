@@ -15,7 +15,7 @@ export const meta = {
   applies: () => false, // opt-in via --ai-indirect <endpoint>
 };
 
-const CANARY = "VIGIL_INDIRECT_5571";
+const CANARY = "KAALI_INDIRECT_5571";
 
 // Each vector frames the canary as *data the agent fetched*, not a user command.
 const VECTORS = [

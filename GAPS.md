@@ -20,18 +20,18 @@ walk on-disk metadata  →  emit NDJSON component records  →  exact-match
 
 **Verdict:** excellent at its narrow job — "which of my machines match a published advisory *right now*." Read-only safety model is genuinely well-designed and trust-building.
 
-## The seams it leaves open (where Vigil plays)
+## The seams it leaves open (where Kaali plays)
 
-| # | Bumblebee gap | Why it matters | Vigil answer |
+| # | Bumblebee gap | Why it matters | Kaali answer |
 |---|---|---|---|
 | 1 | **MCP = inventory only.** Reads configs, never tests servers. | It *sees* every MCP server you use and does nothing security-wise. | `mcp` (deployed-server auth + tool-poisoning) + `mcp-discover` (reads the **same** configs, flags risky launch commands, hands off to live test) |
-| 2 | **Reactive matcher, zero discovery.** No advisory = invisible. | Can't find anything novel/zero-day, only catalogued IOCs. | Vigil *probes for behaviour* (injection, exposure), not version strings — finds the unknown. |
+| 2 | **Reactive matcher, zero discovery.** No advisory = invisible. | Can't find anything novel/zero-day, only catalogued IOCs. | Kaali *probes for behaviour* (injection, exposure), not version strings — finds the unknown. |
 | 3 | **Inventory ≠ vulnerability.** Lists components; never asks "is it exploitable?" | A clean version list says nothing about runtime risk. | Active probes return exploitability, not presence. |
 | 4 | **Blind to invisible-Unicode.** Its GlassWorm catalog *documents* the invisible-loader vector but only version-matches it. | The actual attack content goes undetected. | `content` scanner **decodes** U+E00xx tag chars + zero-width/bidi and reads the hidden instruction. |
 | 5 | **No AI-app security.** Despite reading MCP configs, zero prompt-injection / agent testing. | The #1 OWASP-LLM risk is untouched. | `ai` (direct) + `ai-indirect` (poisoned retrieved content) probes. |
 | 6 | **No PII / DPDP.** | India compliance trigger ignored. | `pii` (Aadhaar Verhoeff + PAN) in code/logs/LLM output. |
-| 7 | **Dev-machine, not shipped app.** Scans your laptop, not your deployed service. | Production attack surface unscanned. | Vigil targets URLs + endpoints + deployed MCP. |
-| 8 | **One-shot, no runtime.** | No continuous monitoring. | Vigil Cloud = 24/7 re-scan + runtime stream (roadmap). |
+| 7 | **Dev-machine, not shipped app.** Scans your laptop, not your deployed service. | Production attack surface unscanned. | Kaali targets URLs + endpoints + deployed MCP. |
+| 8 | **One-shot, no runtime.** | No continuous monitoring. | Kaali Cloud = 24/7 re-scan + runtime stream (roadmap). |
 
 ## What we COPIED from Bumblebee (good ideas, adopted)
 
@@ -42,9 +42,9 @@ walk on-disk metadata  →  emit NDJSON component records  →  exact-match
 
 ## The integration story (the headline)
 
-> **Bumblebee tells you which MCP servers you have. Vigil tells you which ones are dangerous.**
+> **Bumblebee tells you which MCP servers you have. Kaali tells you which ones are dangerous.**
 
-Literal interop: `bumblebee ... > inv.ndjson` → `vigil scan x --mcp-discover --from-bumblebee inv.ndjson`. We consume their inventory and security-test it. Complementary, not competitive — we start exactly where they stop.
+Literal interop: `bumblebee ... > inv.ndjson` → `kaali scan x --mcp-discover --from-bumblebee inv.ndjson`. We consume their inventory and security-test it. Complementary, not competitive — we start exactly where they stop.
 
 ## New in this build (all tested)
 

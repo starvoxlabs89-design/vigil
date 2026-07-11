@@ -1,20 +1,20 @@
-# 🛡️ @starvoxlabs89-design/vigil-guard
+# 🛡️ @kaali/guard
 
 **Runtime AI security guard for Node.js.** Drop-in Express/Next middleware that blocks prompt injection, decodes invisible-Unicode smuggling, redacts Indian PII (DPDP), and firewalls MCP tool calls — in ~2 microseconds per request. Zero dependencies.
 
 ```bash
-npm install @starvoxlabs89-design/vigil-guard
+npm install @kaali/guard
 ```
 
 ```js
 import express from "express";
-import { guard } from "@starvoxlabs89-design/vigil-guard";
+import { guard } from "@kaali/guard";
 
 const g = guard({
   block: ["prompt-injection", "invisible-unicode"],
   redactTypes: ["aadhaar", "pan", "phone_in", "email"],
   mcp: { allow: ["search", "fs.read"] },
-  onEvent: (e) => console.log(e),  // stream to your logger / Vigil Cloud
+  onEvent: (e) => console.log(e),  // stream to your logger / Kaali Cloud
 });
 
 const app = express();
@@ -47,7 +47,7 @@ All in-process. No network hop. No API key. No telemetry unless you wire `onEven
 20,000 iterations · 38.2ms total · 1.91µs per call · 523,623 req/s single-threaded
 ```
 
-For context: Meta's Llama Prompt Guard 2 (86M) takes **92.4ms** per classification on an A100 GPU at 512 tokens ([model card](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M)). Hosted guards' advertised sub-50ms figures are network-bound and only plausible via smaller models, shorter inputs, or hybrid regex-first pipelines. Vigil-guard skips the classifier entirely and is pure in-process regex — different tradeoffs (see below).
+For context: Meta's Llama Prompt Guard 2 (86M) takes **92.4ms** per classification on an A100 GPU at 512 tokens ([model card](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M)). Hosted guards' advertised sub-50ms figures are network-bound and only plausible via smaller models, shorter inputs, or hybrid regex-first pipelines. Kaali-guard skips the classifier entirely and is pure in-process regex — different tradeoffs (see below).
 
 ## API
 
@@ -63,7 +63,7 @@ g.middleware(opts)  // Express-compatible middleware
 ### Next.js App Router
 
 ```js
-import { withGuard } from "@starvoxlabs89-design/vigil-guard/next";
+import { withGuard } from "@kaali/guard/next";
 export const POST = withGuard(async (req) => {
   const { message } = await req.json();       // already sanitized
   return Response.json({ reply: await callLLM(message) });
@@ -78,7 +78,7 @@ guard({ mode: "monitor", onEvent: (e) => metrics.write(e) });
 
 ## How this compares (honest, June 2026)
 
-| | vigil-guard | Superagent (`safety-agent`) | Cloudflare Firewall for AI | Lakera Guard | NeMo Guardrails | Guardrails AI | llm-guard |
+| | kaali-guard | Superagent (`safety-agent`) | Cloudflare Firewall for AI | Lakera Guard | NeMo Guardrails | Guardrails AI | llm-guard |
 |---|---|---|---|---|---|---|---|
 | **Runtime shape** | Node middleware | TS/Python SDK | edge reverse proxy | hosted API | Python library | Python library | Python library |
 | **Language** | **Node/JS** | TS + Python | proxy (any) | any (HTTP) | Python 99% | Python | Python |
@@ -91,20 +91,20 @@ guard({ mode: "monitor", onEvent: (e) => metrics.write(e) });
 | **Dependencies** | **0** | many | N/A (proxy) | HTTP client | heavy | heavy | heavy |
 | **Express/Next middleware form** | ✅ | ❌ (SDK) | N/A (proxy) | ❌ (HTTP) | ❌ | ❌ | ❌ |
 
-**Where vigil-guard sits:** the only OSS that combines **Node/Express middleware form-factor + zero-dependency offline mode + MCP-aware filtering + DPDP-native PII redaction + invisible-Unicode decode.** Any one of those axes is contested; the *bundle* is unclaimed.
+**Where kaali-guard sits:** the only OSS that combines **Node/Express middleware form-factor + zero-dependency offline mode + MCP-aware filtering + DPDP-native PII redaction + invisible-Unicode decode.** Any one of those axes is contested; the *bundle* is unclaimed.
 
 ## Honest tradeoffs
 
 - **Regex-first, no classifier.** Fast and FP-lean, but sophisticated *encoded* injections will slip past — same as every OSS guard until a classifier is plugged in. A pluggable classifier hook is on the roadmap.
 - **Not a substitute for output-side canary filtering + instruction-hierarchy enforcement** in your prompt. This is defence-in-depth, not a magic shield.
-- **Benchmark reality check:** academic evals (arXiv 2506.19109) show classifier scanners hit 0.968–1.000 recall at **1.4%–15.7% FPR** — sentence-mode LLM-Guard hits ~100% recall at ~15.7% FPR, destructive for benign traffic. Vigil-guard trades a lower recall ceiling for near-zero FPR on ordinary prompts.
+- **Benchmark reality check:** academic evals (arXiv 2506.19109) show classifier scanners hit 0.968–1.000 recall at **1.4%–15.7% FPR** — sentence-mode LLM-Guard hits ~100% recall at ~15.7% FPR, destructive for benign traffic. Kaali-guard trades a lower recall ceiling for near-zero FPR on ordinary prompts.
 - **Name note:** an alpha OSS project `deadbits/vigil-llm` exists (last release Dec 2023). This package is the maintained Node runtime guard; no code lineage.
 
-## Pairs with the Vigil scanner
+## Pairs with the Kaali scanner
 
 ```bash
-npx @starvoxlabs89-design/vigil scan https://your-site.com   # CI / scan-time
-npm install @starvoxlabs89-design/vigil-guard                # request-time
+npx @kaali/cli scan https://your-site.com   # CI / scan-time
+npm install @kaali/guard                # request-time
 ```
 
 The scanner tells you what's broken. The guard blocks it as it happens. Same detection primitives; same events shape.

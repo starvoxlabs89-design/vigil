@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vigil — see what's hidden in your content</title>
+<title>Kaali — see what's hidden in your content</title>
 <style>
   :root{
     --bg:#0a0c10; --panel:#11151c; --panel2:#161b24; --line:#222a36;
@@ -56,10 +56,10 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="brand"><span class="dot">🛡</span> Vigil</div>
+  <div class="brand"><span class="dot">🛡</span> Kaali</div>
   <h1>The instruction <span class="grad">hidden in plain sight</span><br>that your AI will obey.</h1>
   <p class="sub">Attackers smuggle commands into web pages and documents using invisible Unicode and cloaked HTML —
-    a human sees nothing, but an AI agent reads and follows them. Paste any text or HTML below and watch Vigil pull the hidden attack out.</p>
+    a human sees nothing, but an AI agent reads and follows them. Paste any text or HTML below and watch Kaali pull the hidden attack out.</p>
 
   <div class="card">
     <div class="label">Paste content an AI might read (a page, an email, a tool result)</div>
@@ -75,14 +75,14 @@
 
   <div class="foot">
     100% in your browser — nothing is uploaded. This is the <code>content</code> scanner from
-    <strong>Vigil</strong>, the open-source security scanner for AI apps.
+    <strong>Kaali</strong>, the open-source security scanner for AI apps.
     It catches the invisible-Unicode vector that endpoint scanners (even Perplexity's Bumblebee) don't decode.
-    <br>Run the full toolkit: <code>npx vigil scan &lt;your-site&gt;</code>
+    <br>Run the full toolkit: <code>npx kaali scan &lt;your-site&gt;</code>
   </div>
 </div>
 
 <script>
-const CANARY_HINT = "VIGIL_INDIRECT_5571";
+const CANARY_HINT = "KAALI_INDIRECT_5571";
 function encodeTag(s){return [...s].map(ch=>String.fromCodePoint(0xE0000+ch.charCodeAt(0))).join("")}
 
 const SAMPLE = `<div class="product-page">

@@ -1,4 +1,4 @@
-import { c, SEVERITY, vigilScore, letterGrade } from "./util.js";
+import { c, SEVERITY, kaaliScore, letterGrade } from "./util.js";
 
 // Human-readable terminal report. Also supports --json for CI.
 export function printReport(target, results) {
@@ -6,7 +6,7 @@ export function printReport(target, results) {
   all.sort((a, b) => (SEVERITY[b.severity].rank - SEVERITY[a.severity].rank));
 
   console.log("");
-  console.log(c.bold(`  Vigil report — ${target}`));
+  console.log(c.bold(`  Kaali report — ${target}`));
   console.log(c.gray(`  ${new Date().toISOString()}`));
   console.log("");
 
@@ -28,13 +28,13 @@ export function printReport(target, results) {
     console.log("");
   }
 
-  const score = vigilScore(all);
+  const score = kaaliScore(all);
   const scoreColor = score >= 80 ? c.green : score >= 50 ? c.yellow : c.red;
   const counts = ["critical", "high", "medium", "low", "info"]
     .map((s) => `${all.filter((f) => f.severity === s).length} ${s}`)
     .join("  ");
   console.log(c.bold("  ─────────────────────────────────────────────"));
-  console.log(`  Vigil Score: ${scoreColor(c.bold(score + "/100"))}    ${c.gray(counts)}`);
+  console.log(`  Kaali Score: ${scoreColor(c.bold(score + "/100"))}    ${c.gray(counts)}`);
   console.log("");
   return { target, score, findings: all };
 }
@@ -42,7 +42,7 @@ export function printReport(target, results) {
 export function jsonReport(target, results) {
   const all = results.flatMap((r) => r.findings.map((f) => ({ ...f, scanner: r.scanner })));
   return JSON.stringify(
-    { target, timestamp: new Date().toISOString(), score: vigilScore(all), findings: all },
+    { target, timestamp: new Date().toISOString(), score: kaaliScore(all), findings: all },
     null,
     2
   );
@@ -86,8 +86,8 @@ export function sarifReport(target, results) {
     version: "2.1.0",
     runs: [{
       tool: { driver: {
-        name: "Vigil",
-        informationUri: "https://github.com/starvoxlabs89-design/vigil",
+        name: "Kaali",
+        informationUri: "https://github.com/starvoxlabs89-design/kaali",
         version: "0.1.0",
         rules: [...rules.values()],
       } },
@@ -97,7 +97,7 @@ export function sarifReport(target, results) {
 }
 
 // ── HTML "report card" — the teaching output. Self-contained doc, no deps.
-//    `vigil scan <t> --html > report.html`. opts.prevScore (optional) draws the trend.
+//    `kaali scan <t> --html > report.html`. opts.prevScore (optional) draws the trend.
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
 const BAND_COLOR = { a: "#45D19A", b: "#8BD46A", c: "#F1C84A", d: "#FF9D46", f: "#FF5D5D" };
 const SEV_BAND = { critical: "crit", high: "high", medium: "med", low: "low", info: "info" };
@@ -141,7 +141,7 @@ export function htmlReport(target, results, opts = {}) {
     .filter((f) => f.severity !== "info")
     .sort((a, b) => SEVERITY[b.severity].rank - SEVERITY[a.severity].rank);
 
-  const score = vigilScore(all);
+  const score = kaaliScore(all);
   const { letter, band } = letterGrade(score);
   const gradeColor = BAND_COLOR[band];
   const counts = ["critical", "high", "medium", "low"].map((s) => ({ s, n: all.filter((f) => f.severity === s).length }));
@@ -184,7 +184,7 @@ export function htmlReport(target, results, opts = {}) {
 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vigil Report Card — ${esc(target)}</title>
+<title>Kaali Report Card — ${esc(target)}</title>
 <style>
 :root{--ground:#0A0E16;--panel:#111823;--panel-2:#17202E;--border:#253044;--border-soft:#1C2637;--text:#E7ECF4;--muted:#8794A6;--faint:#5C6879;--amber:#F6B24B;--crit:#FF5D5D;--high:#FF9D46;--med:#F1C84A;--low:#5AA9FF;--pass:#45D19A;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
@@ -288,8 +288,8 @@ body{margin:0;background:radial-gradient(1100px 620px at 78% -8%,rgba(246,178,75
   ${fixFirst}
   ${cards}
   <div class="foot">
-    <div class="cmd">$ npx <b>@starvoxlabs89-design/vigil</b> scan ${esc(target)} --html</div>
-    <div>Vigil v0.1 · report card</div>
+    <div class="cmd">$ npx <b>@kaali/cli</b> scan ${esc(target)} --html</div>
+    <div>Kaali v0.1 · report card</div>
   </div>
 </div></body></html>`;
 }

@@ -1,7 +1,7 @@
-// Detection primitives — the same signals the Vigil scanner uses, but shaped
+// Detection primitives — the same signals the Kaali scanner uses, but shaped
 // for one-shot, in-the-request-path use. All checks are pure functions.
 
-const CANARY_MARKER = "VIGIL_GUARD_CANARY_9317";
+const CANARY_MARKER = "KAALI_GUARD_CANARY_9317";
 
 // --- Prompt-injection heuristics ---------------------------------------------
 const INJECT_RE = [

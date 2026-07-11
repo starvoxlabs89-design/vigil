@@ -2,9 +2,9 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 // Local scan history → powers the report-card trend ("F · 31 → D+ · 58").
-// One JSON map (target → last result) under .vigil/ in the working dir.
+// One JSON map (target → last result) under .kaali/ in the working dir.
 // Best-effort: every operation swallows errors so a read-only FS never breaks a scan.
-const DIR = ".vigil";
+const DIR = ".kaali";
 const FILE = join(DIR, "history.json");
 
 async function loadAll() {

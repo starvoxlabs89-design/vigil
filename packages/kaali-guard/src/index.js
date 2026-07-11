@@ -1,6 +1,6 @@
 import { detect, redact, checkToolCall, CANARY_MARKER } from "./detect.js";
 
-// Vigil Guard — the runtime API.
+// Kaali Guard — the runtime API.
 //
 // Two entry points:
 //   const g = guard({...})       for library / framework users
@@ -21,7 +21,7 @@ export function guard(opts = {}) {
     redactTypes = DEFAULT_REDACT,   // PII types to mask (in + out)
     stripInvisibleChars = true,
     mcp = null,                // { allow: [...], deny: [...] } — tool-call firewall
-    onEvent = null,            // (evt) => void — stream to Vigil Cloud / your logger
+    onEvent = null,            // (evt) => void — stream to Kaali Cloud / your logger
     mode = "block",            // "block" | "monitor"  (monitor = observe only)
   } = opts;
 
@@ -62,7 +62,7 @@ export function guard(opts = {}) {
 // Inspects req.body[field], blocks or sanitizes in-place. Response protection
 // requires wrapping res.json / res.send — do that opt-in via wrapResponse.
 function makeExpressMiddleware(decide, { field = "message", wrapResponse = false } = {}) {
-  return function vigilGuardMiddleware(req, res, next) {
+  return function kaaliGuardMiddleware(req, res, next) {
     try {
       const value = req.body?.[field];
       if (typeof value === "string" && value.length) {
@@ -70,17 +70,17 @@ function makeExpressMiddleware(decide, { field = "message", wrapResponse = false
         if (r.blocked) {
           res.statusCode = 400;
           res.setHeader("content-type", "application/json");
-          return res.end(JSON.stringify({ error: "vigil_guard_blocked", reason: r.reason, threats: r.threats }));
+          return res.end(JSON.stringify({ error: "kaali_guard_blocked", reason: r.reason, threats: r.threats }));
         }
         req.body[field] = r.sanitized;   // continue with sanitized text
-        req.vigil = { input: r };
+        req.kaali = { input: r };
       }
       if (wrapResponse && res.json) {
         const origJson = res.json.bind(res);
         res.json = (payload) => {
           const asText = typeof payload === "string" ? payload : JSON.stringify(payload);
           const r = decide("output", asText);
-          if (r.blocked) return origJson({ error: "vigil_guard_blocked_output", reason: r.reason });
+          if (r.blocked) return origJson({ error: "kaali_guard_blocked_output", reason: r.reason });
           try { return origJson(JSON.parse(r.sanitized)); } catch { return origJson(r.sanitized); }
         };
       }

@@ -13,11 +13,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: vigil list
-        run: node bin/vigil.js list
+      - name: kaali list
+        run: node bin/kaali.js list
       - name: scan self (text)
-        run: node bin/vigil.js scan . --only secrets,pii
+        run: node bin/kaali.js scan . --only secrets,pii
       - name: scan self (sarif)
-        run: node bin/vigil.js scan . --only secrets,pii --sarif > vigil.sarif
+        run: node bin/kaali.js scan . --only secrets,pii --sarif > kaali.sarif
       - name: validate sarif is parseable
-        run: node -e "const j=JSON.parse(require('fs').readFileSync('vigil.sarif','utf8')); if(j.version!=='2.1.0') throw new Error('bad sarif')"
+        run: node -e "const j=JSON.parse(require('fs').readFileSync('kaali.sarif','utf8')); if(j.version!=='2.1.0') throw new Error('bad sarif')"

@@ -1,14 +1,14 @@
 {
-  "name": "@starvoxlabs89-design/vigil",
+  "name": "@kaali/cli",
   "version": "0.1.0",
   "description": "Open-source security scanner for AI agents, LLM apps & MCP servers — prompt injection, exposed MCP, secrets & PII. DPDP-ready. By Starvox Labs.",
   "type": "module",
   "bin": {
-    "vigil": "bin/vigil.js"
+    "kaali": "bin/kaali.js"
   },
   "scripts": {
-    "start": "node bin/vigil.js",
-    "scan": "node bin/vigil.js scan"
+    "start": "node bin/kaali.js",
+    "scan": "node bin/kaali.js scan"
   },
   "keywords": [
     "security",
@@ -29,10 +29,10 @@
   "homepage": "https://starvoxlabs.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/starvoxlabs89-design/vigil.git"
+    "url": "git+https://github.com/starvoxlabs89-design/kaali.git"
   },
   "bugs": {
-    "url": "https://github.com/starvoxlabs89-design/vigil/issues"
+    "url": "https://github.com/starvoxlabs89-design/kaali/issues"
   },
   "engines": {
     "node": ">=20"

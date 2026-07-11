@@ -1,15 +1,15 @@
 import { SCANNERS, byId } from "./scanners/index.js";
 import { printReport, jsonReport, sarifReport, htmlReport } from "./report.js";
-import { c, vigilScore } from "./util.js";
+import { c, kaaliScore } from "./util.js";
 import { loadPrev, saveScan } from "./history.js";
 
 const HELP = `
-${c.bold("vigil")} — open-source security scanner + 24/7 monitor for AI agents, LLM apps & websites.
+${c.bold("kaali")} — open-source security scanner + 24/7 monitor for AI agents, LLM apps & websites.
 
 ${c.bold("USAGE")}
-  vigil scan <target> [options]
-  vigil monitor <target> [options]
-  vigil list
+  kaali scan <target> [options]
+  kaali monitor <target> [options]
+  kaali list
 
 ${c.bold("TARGET")}
   A URL (https://example.com)  → runs web checks
@@ -22,22 +22,22 @@ ${c.bold("OPTIONS")}
   --mcp <url>            Scan a DEPLOYED MCP server for no-auth + tool poisoning
   --mcp-discover         Find local MCP configs + flag risky servers (Bumblebee bridge)
   --from-bumblebee <f>   Ingest Bumblebee NDJSON output (with --mcp-discover)
-  --only <ids>           Comma-separated scanner ids (see 'vigil list')
+  --only <ids>           Comma-separated scanner ids (see 'kaali list')
   --json                 Machine-readable output (for CI/CD)
   --sarif                SARIF 2.1.0 output (GitHub code-scanning)
   --html                 Shareable "report card" — graded, with a lesson per finding
-  --no-history            Don't read/write the local .vigil/ trend history
+  --no-history            Don't read/write the local .kaali/ trend history
   --fail-on <sev>        Exit non-zero if a finding >= severity (critical|high|medium|low)
   -h, --help             Show this help
 
 ${c.bold("EXAMPLES")}
-  vigil scan https://mysite.in
-  vigil scan ./repo --fail-on high
-  vigil scan https://docs.mysite.in --only content      # hidden-instruction / invisible-unicode
-  vigil scan x --ai https://api.myapp.com/chat
-  vigil scan x --ai-indirect https://api.myapp.com/chat
-  vigil scan x --mcp http://localhost:8000/mcp
-  vigil scan x --mcp-discover                            # reads local MCP configs
+  kaali scan https://mysite.in
+  kaali scan ./repo --fail-on high
+  kaali scan https://docs.mysite.in --only content      # hidden-instruction / invisible-unicode
+  kaali scan x --ai https://api.myapp.com/chat
+  kaali scan x --ai-indirect https://api.myapp.com/chat
+  kaali scan x --mcp http://localhost:8000/mcp
+  kaali scan x --mcp-discover                            # reads local MCP configs
 `;
 
 function parseArgs(argv) {
@@ -89,7 +89,7 @@ export async function main(argv) {
   }
 
   if (cmd === "monitor") {
-    console.log(c.yellow("\n  vigil monitor — continuous mode is on the roadmap (see SPEC.md).\n") +
+    console.log(c.yellow("\n  kaali monitor — continuous mode is on the roadmap (see SPEC.md).\n") +
       c.gray("  v0.1 ships the scan engine; monitoring wraps it on an interval + OTEL stream + alerting.\n"));
     return 0;
   }
@@ -117,7 +117,7 @@ export async function main(argv) {
 
   // Trend: load the prior score for this target, then persist the current one.
   const allFindings = results.flatMap((r) => r.findings).filter((f) => f.severity !== "info");
-  const score = vigilScore(allFindings);
+  const score = kaaliScore(allFindings);
   if (opts.html && !opts.noHistory) {
     const prev = await loadPrev(target);
     if (prev) opts.prevScore = prev.score;

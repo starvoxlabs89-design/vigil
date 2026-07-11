@@ -1,6 +1,6 @@
-name: Vigil example
+name: Kaali example
 
-# This is a SAMPLE workflow showing how third-party repos consume the Vigil
+# This is a SAMPLE workflow showing how third-party repos consume the Kaali
 # action once it's published. In this repo's own CI it runs against itself.
 on:
   push:
@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Vigil
-        # When published, replace with: uses: your-org/vigil@v0
+      - name: Run Kaali
+        # When published, replace with: uses: your-org/kaali@v0
         uses: ./
         with:
           target: "."

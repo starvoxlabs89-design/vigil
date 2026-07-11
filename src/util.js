@@ -15,7 +15,7 @@ export const c = {
   dim: wrap(2),
 };
 
-// Severity ordering + weights drive the Vigil Score.
+// Severity ordering + weights drive the Kaali Score.
 export const SEVERITY = {
   critical: { rank: 4, weight: 40, color: c.red, label: "CRITICAL" },
   high: { rank: 3, weight: 20, color: c.red, label: "HIGH" },
@@ -35,7 +35,7 @@ export function finding({ id, title, severity, detail, evidence, owasp, dpdp, fi
 // resolution — a page with two criticals reads worse than one instead of both
 // flooring at 0 — so the grade actually moves as you fix things.
 const SCORE_K = 80;
-export function vigilScore(findings) {
+export function kaaliScore(findings) {
   let penalty = 0;
   for (const f of findings) penalty += SEVERITY[f.severity]?.weight ?? 0;
   return Math.round(100 * Math.exp(-penalty / SCORE_K));

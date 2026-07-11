@@ -1,6 +1,6 @@
-name: "Vigil Security Scan"
+name: "Kaali Security Scan"
 description: "Open-source security scanner for AI agents, LLM apps & websites (prompt injection, MCP, secrets, Indian PII/DPDP)."
-author: "Vigil"
+author: "Kaali"
 branding:
   icon: "shield"
   color: "green"
@@ -37,7 +37,7 @@ inputs:
   sarif-file:
     description: "Path for the SARIF output file."
     required: false
-    default: "vigil.sarif"
+    default: "kaali.sarif"
 
 outputs:
   sarif-file:
@@ -52,39 +52,39 @@ runs:
       with:
         node-version: "20"
 
-    - name: Run Vigil
+    - name: Run Kaali
       shell: bash
       env:
-        VIGIL_TARGET: ${{ inputs.target }}
-        VIGIL_AI: ${{ inputs.ai-endpoint }}
-        VIGIL_AI_INDIRECT: ${{ inputs.ai-indirect-endpoint }}
-        VIGIL_MCP: ${{ inputs.mcp-url }}
-        VIGIL_DISCOVER: ${{ inputs.mcp-discover }}
-        VIGIL_ONLY: ${{ inputs.only }}
-        VIGIL_FAIL_ON: ${{ inputs.fail-on }}
-        VIGIL_SARIF: ${{ inputs.sarif-file }}
+        KAALI_TARGET: ${{ inputs.target }}
+        KAALI_AI: ${{ inputs.ai-endpoint }}
+        KAALI_AI_INDIRECT: ${{ inputs.ai-indirect-endpoint }}
+        KAALI_MCP: ${{ inputs.mcp-url }}
+        KAALI_DISCOVER: ${{ inputs.mcp-discover }}
+        KAALI_ONLY: ${{ inputs.only }}
+        KAALI_FAIL_ON: ${{ inputs.fail-on }}
+        KAALI_SARIF: ${{ inputs.sarif-file }}
       run: |
         set -e
-        ARGS=("scan" "$VIGIL_TARGET")
-        [ -n "$VIGIL_AI" ]          && ARGS+=("--ai" "$VIGIL_AI")
-        [ -n "$VIGIL_AI_INDIRECT" ] && ARGS+=("--ai-indirect" "$VIGIL_AI_INDIRECT")
-        [ -n "$VIGIL_MCP" ]         && ARGS+=("--mcp" "$VIGIL_MCP")
-        [ "$VIGIL_DISCOVER" = "true" ] && ARGS+=("--mcp-discover")
-        [ -n "$VIGIL_ONLY" ]        && ARGS+=("--only" "$VIGIL_ONLY")
-        [ -n "$VIGIL_FAIL_ON" ]     && ARGS+=("--fail-on" "$VIGIL_FAIL_ON")
+        ARGS=("scan" "$KAALI_TARGET")
+        [ -n "$KAALI_AI" ]          && ARGS+=("--ai" "$KAALI_AI")
+        [ -n "$KAALI_AI_INDIRECT" ] && ARGS+=("--ai-indirect" "$KAALI_AI_INDIRECT")
+        [ -n "$KAALI_MCP" ]         && ARGS+=("--mcp" "$KAALI_MCP")
+        [ "$KAALI_DISCOVER" = "true" ] && ARGS+=("--mcp-discover")
+        [ -n "$KAALI_ONLY" ]        && ARGS+=("--only" "$KAALI_ONLY")
+        [ -n "$KAALI_FAIL_ON" ]     && ARGS+=("--fail-on" "$KAALI_FAIL_ON")
 
         # Human-readable run (always shown in the job log; never fails the step on its own)
-        npx -y vigil "${ARGS[@]}" || true
+        npx -y kaali "${ARGS[@]}" || true
 
         # SARIF run (the actual gate — exits non-zero per --fail-on)
-        npx -y vigil "${ARGS[@]}" --sarif > "$VIGIL_SARIF"
-        VIGIL_EXIT=$?
-        echo "vigil-exit=$VIGIL_EXIT" >> "$GITHUB_OUTPUT" || true
-        exit $VIGIL_EXIT
+        npx -y kaali "${ARGS[@]}" --sarif > "$KAALI_SARIF"
+        KAALI_EXIT=$?
+        echo "kaali-exit=$KAALI_EXIT" >> "$GITHUB_OUTPUT" || true
+        exit $KAALI_EXIT
 
     - name: Upload SARIF to GitHub code-scanning
       if: always() && inputs.upload-sarif == 'true'
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: ${{ inputs.sarif-file }}
-        category: vigil
+        category: kaali

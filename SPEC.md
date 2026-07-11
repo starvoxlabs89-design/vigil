@@ -1,6 +1,6 @@
-# Vigil — Product Spec (v0.1)
+# Kaali — Product Spec (v0.1)
 
-> Working name. Rename is trivial (one string in `package.json`). Candidates if "Vigil" collides: **Kavach**, **Prahari**, **Drishti** (India-flavored), or **Sentry/Argus** alternatives. Check npm + GitHub + trademark before locking.
+> Working name. Rename is trivial (one string in `package.json`). Candidates if "Kaali" collides: **Kavach**, **Prahari**, **Drishti** (India-flavored), or **Sentry/Argus** alternatives. Check npm + GitHub + trademark before locking.
 
 ## 1. One-liner
 
@@ -43,7 +43,7 @@ A deep-research pass (104 agents, 24/25 claims verified) stress-tested the diffe
 
 ```
                       ┌─────────────────────────────────────┐
-   vigil (OSS CLI)    │  bin/vigil.js → src/cli.js           │
+   kaali (OSS CLI)    │  bin/kaali.js → src/cli.js           │
    ─ zero-dep, MIT ─  │     ├─ scanners/  (pluggable)        │
                       │     │    web · secrets · pii · ai ·  │
                       │     │    mcp  (+ community probes)    │
@@ -53,7 +53,7 @@ A deep-research pass (104 agents, 24/25 claims verified) stress-tested the diffe
                                      │  --report → POST (opt-in telemetry)
                                      ▼
                       ┌─────────────────────────────────────┐
-   Vigil Cloud (paid) │  Ingest (OTEL-native) → Timescale DB │
+   Kaali Cloud (paid) │  Ingest (OTEL-native) → Timescale DB │
                       │  ├─ 24/7 monitor (interval re-scan)  │
                       │  ├─ live LLM/agent traffic guardrail │
                       │  ├─ trends · diff · alerting (Slack)  │
@@ -66,14 +66,14 @@ A deep-research pass (104 agents, 24/25 claims verified) stress-tested the diffe
 - **Zero dependencies** (Node ≥20 built-in `fetch`) → clone-and-run, no supply-chain risk, instant `npx`.
 - **Pluggable scanner registry** (`src/scanners/index.js`) → community PRs add probes = community-driven coverage growth (a soft moat).
 - **OTEL as the ingestion standard** for Cloud → ride the industry convergence, plug into Datadog/Honeycomb, avoid lock-in objections.
-- **Severity-weighted Vigil Score** → the shareable, viral artifact (people screenshot scores).
+- **Severity-weighted Kaali Score** → the shareable, viral artifact (people screenshot scores).
 
 ## 5. OSS vs. Paid line (the bridge)
 
-| | Free / OSS (the wedge) | Vigil Cloud (the revenue) |
+| | Free / OSS (the wedge) | Kaali Cloud (the revenue) |
 |---|---|---|
 | Scan engine (all 5 scanners) | ✅ local, unlimited | ✅ |
-| Vigil Score + fixes | ✅ | ✅ |
+| Kaali Score + fixes | ✅ | ✅ |
 | CI/CD `--fail-on` gate | ✅ | ✅ |
 | **24/7 continuous monitoring** | — | ✅ interval re-scan + live traffic |
 | History, trends, diff over time | — | ✅ |
@@ -84,7 +84,7 @@ A deep-research pass (104 agents, 24/25 claims verified) stress-tested the diffe
 
 Free tool collects the data + the inbound; paid tier is the team-of-record + the artifact a regulator accepts.
 
-## 6. The "24/7 monitoring" build (what `vigil monitor` becomes)
+## 6. The "24/7 monitoring" build (what `kaali monitor` becomes)
 
 1. **Scheduled re-scan** of registered targets (cron/interval), storing each run.
 2. **Diff engine** — alert only on *new* findings (no alert fatigue).
@@ -94,8 +94,8 @@ Free tool collects the data + the inbound; paid tier is the team-of-record + the
 
 ## 7. Viral launch plan (bottom-up)
 
-- **Hook:** `npx vigil scan <your-site>` → instant scary score. The DPDP/Aadhaar angle is novel and India-press-friendly.
-- **Channels:** Show HN ("Vigil — the security scanner for AI apps, in one command"); r/netsec, r/devops; a sharp launch thread in operator voice; PH.
+- **Hook:** `npx kaali scan <your-site>` → instant scary score. The DPDP/Aadhaar angle is novel and India-press-friendly.
+- **Channels:** Show HN ("Kaali — the security scanner for AI apps, in one command"); r/netsec, r/devops; a sharp launch thread in operator voice; PH.
 - **Content flywheel:** publish anonymized aggregate findings ("we scanned 1,000 Indian SaaS sites — X% leak PAN numbers in their JS") → press + backlinks + the data moat made visible.
 - **Stars→revenue:** seed CI/CD adoption → "monitor this 24/7?" upsell → DPDP report closes enterprise.
 
@@ -107,12 +107,12 @@ Free tool collects the data + the inbound; paid tier is the team-of-record + the
 - ✅ `pii` scanner — Aadhaar (Verhoeff-validated), PAN, mobile, email → DPDP tags (tested)
 - ✅ `ai` scanner — 4 prompt-injection canary probes (opt-in, needs live endpoint)
 - ✅ `mcp` scanner — no-auth exposure + tool-poisoning heuristics (opt-in, needs live endpoint)
-- ✅ Vigil Score + severity-ranked terminal/JSON report
+- ✅ Kaali Score + severity-ranked terminal/JSON report
 
 ## 9. Next slices (priority order)
 
 1. SARIF output (GitHub code-scanning integration → free distribution).
-2. GitHub Action wrapper (`vigil-action`) → one-line adoption in any repo.
+2. GitHub Action wrapper (`kaali-action`) → one-line adoption in any repo.
 3. More `secrets` providers + entropy detection; `web` → light DAST (Nuclei-template ingestion).
 4. Real MCP transport support (SSE/streamable-HTTP) + signed-manifest check.
 5. `ai` config file (custom endpoints, auth, response-shape mapping) + jailbreak corpus.

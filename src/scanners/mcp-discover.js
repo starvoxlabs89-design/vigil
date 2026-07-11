@@ -5,7 +5,7 @@ import { finding } from "../util.js";
 
 // THE BUMBLEBEE BRIDGE.
 // Perplexity's Bumblebee inventories local MCP config files but never inspects
-// what they point to. Vigil reads the SAME configs, then goes one step further:
+// what they point to. Kaali reads the SAME configs, then goes one step further:
 // it flags dangerous server definitions and hands off live servers to the `mcp`
 // scanner for an auth + tool-poisoning test.
 //
@@ -140,7 +140,7 @@ export async function run(target, opts = {}) {
     detail: servers.length
       ? servers.map((s) => `${s.name}${s.liveUrl ? " → " + s.liveUrl : ""}`).join(", ")
       : "No MCP configs found in well-known locations or cwd.",
-    fix: live.length ? `Security-test each: ${live.map((s) => `vigil scan x --mcp ${s.liveUrl}`).join(" ; ")}` : undefined,
+    fix: live.length ? `Security-test each: ${live.map((s) => `kaali scan x --mcp ${s.liveUrl}`).join(" ; ")}` : undefined,
   }));
   return findings;
 }
