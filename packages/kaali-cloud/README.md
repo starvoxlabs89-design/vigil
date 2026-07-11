@@ -61,6 +61,11 @@ Without `RESEND_API_KEY` the verify/reset emails print to stdout — copy the li
 | POST | `/auth/logout` | destroy session |
 | POST | `/auth/forgot` | `{ email }` — opaque success (never leaks user existence) |
 | POST | `/auth/reset` | `{ tok, password }` — kills all sessions after reset |
+| GET  | `/auth/providers` | which OAuth providers are configured (UI reveal) |
+| GET  | `/auth/google` | begin Google OAuth (PKCE) |
+| GET  | `/auth/google/callback` | handle Google redirect, create/link user, set session |
+| GET  | `/auth/meta` | begin Meta/Facebook OAuth (PKCE) |
+| GET  | `/auth/meta/callback` | handle Meta redirect, create/link user, set session |
 | GET  | `/me` | whoami |
 | DELETE | `/me` | DPDP §12 erasure |
 | GET  | `/me/stats` | 30-day rollup |
@@ -69,6 +74,39 @@ Without `RESEND_API_KEY` the verify/reset emails print to stdout — copy the li
 | POST | `/me/keys` | create — returns full key **once** |
 | POST | `/me/keys/:id/revoke` | revoke a key |
 | POST | `/ingest` | Bearer or `?key=` — accepts CLI + guard events |
+
+## OAuth setup — Google & Meta
+
+Both providers are optional. If the env vars aren't set, the UI hides the buttons — the page still works with email/password.
+
+### Google (~5 minutes, no review needed)
+1. [console.cloud.google.com](https://console.cloud.google.com) → *APIs & Services → Credentials*.
+2. *Create Credentials → OAuth client ID → Web application*.
+3. **Authorized redirect URI:** `https://api.kaali.io/auth/google/callback` (and `http://localhost:4842/auth/google/callback` for dev).
+4. Copy the Client ID + Client Secret into `.env`:
+   ```
+   GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=xxx
+   ```
+5. Configure the OAuth consent screen (User type: External · Scopes: `openid email profile`).
+
+### Meta / Facebook Login (~15 min + Business Verification for public launch)
+1. [developers.facebook.com](https://developers.facebook.com) → *My Apps → Create App* (type: **Consumer** or **Business**).
+2. Add product: **Facebook Login → Settings**.
+3. **Valid OAuth Redirect URI:** `https://api.kaali.io/auth/meta/callback`.
+4. Under *App Settings → Basic*: set **Privacy Policy URL** = `https://api.kaali.io/privacy.html`, **App Icon**, **Category**.
+5. Copy App ID + App Secret into `.env`:
+   ```
+   META_APP_ID=xxx
+   META_APP_SECRET=xxx
+   ```
+6. **For public launch (post 2024 change):** submit for **App Review** to request Advanced Access to the `email` and `public_profile` scopes, and complete **Business Verification**. Until then Meta login only works for Admins/Testers of the app. Start this in parallel with the Google flow — it takes days.
+
+### How the flow works (identity linking rules)
+- If `(provider, provider_user_id)` is already linked → sign in.
+- Else if a user with that email already exists → link the identity + sign in (also marks the account verified if it wasn't).
+- Else create a new user, log DPDP consent as `signup_google` / `signup_meta`, and sign in.
+- A single Kaali account can have **both** Google and Meta linked to the same email.
 
 ## Deploy (Hostinger Mumbai VPS)
 
