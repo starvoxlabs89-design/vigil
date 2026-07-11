@@ -56,9 +56,12 @@ if ! sudo -u postgres psql -lqt | cut -d\| -f1 | grep -qw "$DB_NAME"; then
 fi
 
 step "Applying migrations"
+# Pipe SQL via stdin so the `postgres` OS user doesn't need to traverse the
+# kaali user's home dir (which is 750). Migrations are idempotent
+# (CREATE TABLE IF NOT EXISTS + ALTER … DROP NOT NULL is safe on re-run).
 for f in "$APP_DIR"/migrations/*.sql; do
   echo "  applying $(basename "$f")"
-  sudo -u postgres psql -d "$DB_NAME" -f "$f" >/dev/null
+  cat "$f" | sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 >/dev/null
 done
 
 # --- 4. .env -----------------------------------------------------------------
