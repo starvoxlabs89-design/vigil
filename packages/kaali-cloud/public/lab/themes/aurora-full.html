@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starvox — Aurora</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#07010f;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* AURORA ORB LAYER */
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);animation:drift 18s ease-in-out infinite}
+.o1{width:600px;height:600px;background:radial-gradient(circle,rgba(124,58,237,.35),transparent 70%);top:-10%;left:-10%;animation-duration:20s}
+.o2{width:500px;height:500px;background:radial-gradient(circle,rgba(37,99,235,.3),transparent 70%);top:20%;right:-5%;animation-duration:16s;animation-delay:-5s}
+.o3{width:700px;height:700px;background:radial-gradient(circle,rgba(236,72,153,.22),transparent 70%);bottom:-20%;left:25%;animation-duration:24s;animation-delay:-10s}
+.o4{width:400px;height:400px;background:radial-gradient(circle,rgba(56,189,248,.2),transparent 70%);top:60%;right:20%;animation-duration:19s;animation-delay:-7s}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.05)}66%{transform:translate(-20px,40px) scale(.96)}}
+/* GLASS UTILITY */
+.glass{background:rgba(255,255,255,.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1)}
+.glass-dark{background:rgba(7,1,15,.6);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08)}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 48px;display:flex;align-items:center;gap:20px;background:rgba(7,1,15,.5);backdrop-filter:blur(28px);border-bottom:1px solid rgba(255,255,255,.07)}
+.nav-logo{font-size:16px;font-weight:800;letter-spacing:-.03em;flex:1;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:rgba(255,255,255,.45);text-decoration:none;font-size:13px;transition:color .15s}
+.nav-links a:hover{color:#fff}
+.nav-pill{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#c4b5fd}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#f472b6;box-shadow:0 0 8px #f472b6;animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 8px #f472b6,0 0 16px #f472b6}50%{opacity:.5;box-shadow:0 0 3px #f472b6}}
+.nav-cta{padding:9px 24px;border-radius:999px;font-size:13px;font-weight:700;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;cursor:pointer;transition:all .25s;box-shadow:0 4px 20px rgba(124,58,237,.3)}
+.nav-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,58,237,.5)}
+/* WRAP */
+.wrap{position:relative;z-index:1}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 24px 80px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:999px;font-size:11.5px;font-weight:600;margin-bottom:40px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#c4b5fd;letter-spacing:.03em;animation:badge-float 5s ease-in-out infinite}
+@keyframes badge-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.hero h1{font-size:clamp(44px,8.5vw,108px);font-weight:800;letter-spacing:-.06em;line-height:.88;margin-bottom:28px}
+.gtext{background:linear-gradient(135deg,#fff 0%,#f0abfc 40%,#818cf8 70%,#38bdf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.55);line-height:1.8;max-width:500px;margin:0 auto 52px}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:80px}
+.btn-primary{padding:15px 40px;border-radius:14px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#7c3aed,#2563eb,#0ea5e9);background-size:200%;color:#fff;border:none;cursor:pointer;transition:all .3s;box-shadow:0 8px 32px rgba(124,58,237,.35)}
+.btn-primary:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 14px 48px rgba(124,58,237,.5)}
+.btn-ghost{padding:15px 40px;border-radius:14px;font-size:14px;font-weight:600;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);color:rgba(255,255,255,.7);cursor:pointer;backdrop-filter:blur(8px);transition:all .2s}
+.btn-ghost:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1);transform:translateY(-2px)}
+/* STAT BAR */
+.stats{display:flex;gap:60px;justify-content:center;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-n{font-size:52px;font-weight:800;letter-spacing:-.05em;line-height:1;margin-bottom:6px}
+.s1{background:linear-gradient(135deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s2{background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s3{background:linear-gradient(135deg,#38bdf8,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.s4{background:linear-gradient(135deg,#4ade80,#facc15);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-l{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+/* DIVIDER */
+.divider{margin:80px auto;height:1px;max-width:800px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.4) 30%,rgba(56,189,248,.4) 70%,transparent)}
+/* SECTION */
+.section{padding:0 48px 100px;max-width:1200px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:64px}
+.sec-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:14px;font-weight:600}
+.sec-title{font-size:clamp(28px,3.5vw,46px);font-weight:700;letter-spacing:-.035em;line-height:1.1}
+.sec-title span{background:linear-gradient(135deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sec-sub{font-size:15px;color:rgba(255,255,255,.45);margin-top:14px;max-width:520px;margin-left:auto;margin-right:auto}
+/* AGENT CARDS */
+.agent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.a-card{border-radius:20px;padding:28px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);backdrop-filter:blur(12px);transition:all .3s;position:relative;overflow:hidden;cursor:default}
+.a-card::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .35s;background:var(--grd)}
+.a-card:hover{transform:translateY(-6px);border-color:rgba(167,139,250,.35);box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 0 1px rgba(167,139,250,.18)}
+.a-card:hover::before{opacity:1}
+.a-icon{font-size:36px;margin-bottom:18px;position:relative;z-index:1}
+.a-name{font-size:16px;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+.a-desc{font-size:12.5px;color:rgba(255,255,255,.48);line-height:1.75;position:relative;z-index:1}
+.a-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px;position:relative;z-index:1}
+.tag{font-size:9.5px;padding:4px 11px;border-radius:999px;font-weight:600;letter-spacing:.04em}
+.tp{background:rgba(244,114,182,.1);border:1px solid rgba(244,114,182,.22);color:#f9a8d4}
+.tv{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.22);color:#c4b5fd}
+.tb{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:#7dd3fc}
+.tg{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);color:#86efac}
+/* PIPELINE */
+.pipe-row{display:flex;position:relative;margin-top:56px;gap:0}
+.pipe-line{position:absolute;top:44px;left:44px;right:44px;height:1px;background:linear-gradient(90deg,#7c3aed,#2563eb,#0ea5e9,#4ade80);opacity:.3;animation:shimmer 3s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:.25}50%{opacity:.55}}
+.p-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:1;cursor:default}
+.p-ring{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;transition:all .3s;border:1.5px solid;backdrop-filter:blur(8px)}
+.p-node:hover .p-ring{transform:translateY(-8px) scale(1.1);box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.pn0{background:rgba(244,114,182,.1);border-color:rgba(244,114,182,.4);color:#f9a8d4;box-shadow:0 0 32px rgba(244,114,182,.2)}
+.pn1{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:#c4b5fd;box-shadow:0 0 32px rgba(167,139,250,.2)}
+.pn2{background:rgba(56,189,248,.1);border-color:rgba(56,189,248,.35);color:#7dd3fc;box-shadow:0 0 32px rgba(56,189,248,.2)}
+.pn3{background:rgba(251,146,60,.1);border-color:rgba(251,146,60,.35);color:#fed7aa;box-shadow:0 0 32px rgba(251,146,60,.15)}
+.pn4{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.35);color:#fca5a5;box-shadow:0 0 32px rgba(248,113,113,.15)}
+.pn5{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.35);color:#86efac;box-shadow:0 0 32px rgba(74,222,128,.15)}
+.p-lbl{font-size:12.5px;font-weight:700;color:#fff;text-align:center}
+.p-sub{font-size:10px;color:rgba(255,255,255,.3);text-align:center;margin-top:2px}
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.tcard{border-radius:18px;padding:28px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);backdrop-filter:blur(12px)}
+.tcard-quote{font-size:14px;color:rgba(255,255,255,.7);line-height:1.8;margin-bottom:24px;font-style:italic}
+.tcard-quote::before{content:'"';font-size:28px;color:#a78bfa;font-style:normal;line-height:0;vertical-align:-8px;margin-right:4px}
+.tcard-author{display:flex;align-items:center;gap:12px}
+.tcard-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#2563eb);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tcard-name{font-size:13px;font-weight:700;color:#fff}
+.tcard-role{font-size:11px;color:rgba(255,255,255,.35)}
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.price-card{border-radius:20px;padding:36px 28px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);backdrop-filter:blur(12px);position:relative;transition:all .3s}
+.price-card.featured{border-color:rgba(167,139,250,.4);background:rgba(124,58,237,.08);box-shadow:0 0 0 1px rgba(167,139,250,.2),0 24px 64px rgba(124,58,237,.2)}
+.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);padding:5px 18px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.06em;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;white-space:nowrap}
+.price-tier{font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:12px}
+.price-amt{font-size:52px;font-weight:800;letter-spacing:-.05em;line-height:1;margin-bottom:6px}
+.price-usd{font-size:18px;vertical-align:top;margin-top:12px;display:inline-block;font-weight:600;color:rgba(255,255,255,.6)}
+.price-period{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:28px}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:36px}
+.price-features li{font-size:13px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:10px}
+.price-features li::before{content:"✓";width:18px;height:18px;border-radius:50%;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#86efac;flex-shrink:0}
+.price-btn{width:100%;padding:14px;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s;border:none}
+.price-btn-outline{background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7)}
+.price-btn-outline:hover{border-color:rgba(255,255,255,.35);color:#fff}
+.price-btn-grad{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;box-shadow:0 6px 24px rgba(124,58,237,.3)}
+.price-btn-grad:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(124,58,237,.45)}
+/* FAQ */
+.faq{display:flex;flex-direction:column;gap:1px;border-radius:16px;overflow:hidden}
+.faq-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.faq-item:first-child{border-radius:16px 16px 0 0}
+.faq-item:last-child{border-radius:0 0 16px 16px}
+.faq-q{padding:22px 28px;font-size:14.5px;font-weight:600;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;user-select:none;transition:background .15s}
+.faq-q:hover{background:rgba(255,255,255,.04)}
+.faq-arrow{font-size:18px;color:rgba(255,255,255,.35);transition:transform .25s;flex-shrink:0}
+.faq-a{font-size:13.5px;color:rgba(255,255,255,.5);line-height:1.8;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.faq-item.open .faq-a{max-height:200px;padding:0 28px 22px}
+.faq-item.open .faq-arrow{transform:rotate(180deg);color:#a78bfa}
+/* CTA */
+.cta{padding:80px 48px;max-width:1000px;margin:0 auto}
+.cta-inner{border-radius:28px;padding:80px 60px;text-align:center;position:relative;overflow:hidden;border:1px solid rgba(167,139,250,.2);background:rgba(124,58,237,.07)}
+.cta-glow{position:absolute;inset:0;background:radial-gradient(ellipse 80% 120% at 50% 100%,rgba(124,58,237,.2),transparent 60%);pointer-events:none}
+.cta-inner h2{font-size:clamp(36px,5.5vw,68px);font-weight:800;letter-spacing:-.05em;line-height:.92;margin-bottom:20px;position:relative;z-index:1}
+.cta-inner p{color:rgba(255,255,255,.45);font-size:15px;margin-bottom:40px;position:relative;z-index:1}
+.cta-inner .btn-primary{position:relative;z-index:1;font-size:15px;padding:18px 56px;border-radius:16px}
+/* FOOTER */
+footer{padding:32px 48px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.foot-logo{font-size:15px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.foot-links{display:flex;gap:24px}
+.foot-links a{font-size:12px;color:rgba(255,255,255,.3);text-decoration:none;transition:color .15s}
+.foot-links a:hover{color:rgba(255,255,255,.7)}
+.foot-copy{font-size:11px;color:rgba(255,255,255,.2)}
+@media(max-width:900px){.agent-grid,.testi-grid,.pricing-grid{grid-template-columns:1fr}.section{padding-left:20px;padding-right:20px}.pipe-row{flex-wrap:wrap;justify-content:center;gap:24px}.pipe-line{display:none}nav{padding:14px 20px}.nav-links{display:none}.stats{gap:32px}.cta{padding:48px 20px}.cta-inner{padding:48px 24px}}
+</style>
+</head>
+<body>
+<div class="aurora">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div>
+</div>
+<div class="wrap">
+<nav>
+  <div class="nav-logo">Starvox</div>
+  <div class="nav-links"><a href="#">Agents</a><a href="#">Pipeline</a><a href="#">Pricing</a><a href="#">Docs</a></div>
+  <div class="nav-pill"><span class="live-dot"></span>16 agents live</div>
+  <button class="nav-cta">Start free →</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">✦ The world's first AI Company OS</div>
+  <h1>
+    <span class="gtext">Your company,</span>
+    <span class="gtext">run by AI.</span>
+  </h1>
+  <p class="hero-sub">16 specialist agents handle spec, code, QA, security, deploy, and monitoring — in parallel, on every task, across your whole portfolio.</p>
+  <div class="hero-btns">
+    <button class="btn-primary">Start building free →</button>
+    <button class="btn-ghost">Watch the demo</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n s1">16</div><div class="stat-l">Agents</div></div>
+    <div class="stat"><div class="stat-n s2">31</div><div class="stat-l">Tools</div></div>
+    <div class="stat"><div class="stat-n s3">25</div><div class="stat-l">Models</div></div>
+    <div class="stat"><div class="stat-n s4">$0.03</div><div class="stat-l">Avg build</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="sec-head">
+    <div class="sec-eyebrow">Agent roster</div>
+    <div class="sec-title">An AI team that <span>never sleeps.</span></div>
+    <div class="sec-sub">Every specialist you need — already on your team. No hiring, no onboarding.</div>
+  </div>
+  <div class="agent-grid">
+    <div class="a-card" style="--grd:linear-gradient(135deg,rgba(167,139,250,.07),rgba(124,58,237,.04))"><div class="a-icon">🎯</div><div class="a-name">PM Agent</div><div class="a-desc">Turns natural language into a full spec, builds a subtask DAG, assigns work to the right specialists, and reports back.</div><div class="a-tags"><span class="tag tv">spec</span><span class="tag tv">orchestrate</span><span class="tag tv">roadmap</span></div></div>
+    <div class="a-card" style="--grd:linear-gradient(135deg,rgba(56,189,248,.07),rgba(6,182,212,.04))"><div class="a-icon">🎨</div><div class="a-name">Frontend Dev</div><div class="a-desc">Builds pixel-perfect React/Vue/vanilla UI. Knows your design system. Writes production components with zero placeholders.</div><div class="a-tags"><span class="tag tb">react</span><span class="tag tb">css</span><span class="tag tb">figma</span></div></div>
+    <div class="a-card" style="--grd:linear-gradient(135deg,rgba(74,222,128,.07),rgba(16,185,129,.04))"><div class="a-icon">⚙️</div><div class="a-name">Backend Dev</div><div class="a-desc">APIs, DB schemas, business logic, integrations. Runs code in a sandboxed environment and self-corrects until tests pass.</div><div class="a-tags"><span class="tag tg">fastapi</span><span class="tag tg">supabase</span><span class="tag tg">sandbox</span></div></div>
+    <div class="a-card" style="--grd:linear-gradient(135deg,rgba(251,191,36,.06),rgba(245,158,11,.03))"><div class="a-icon">🧪</div><div class="a-name">QA Agent</div><div class="a-desc">Writes and runs unit, integration, and browser-driven UI tests. Catches regressions before your users do.</div><div class="a-tags"><span class="tag tp">pytest</span><span class="tag tp">playwright</span><span class="tag tp">coverage</span></div></div>
+    <div class="a-card" style="--grd:linear-gradient(135deg,rgba(248,113,113,.07),rgba(239,68,68,.04))"><div class="a-icon">🔒</div><div class="a-name">Security Agent</div><div class="a-desc">OWASP top 10 scan, leaked key detection, vulnerable dependency audit — run automatically on every single release.</div><div class="a-tags"><span class="tag tp">owasp</span><span class="tag tp">audit</span><span class="tag tp">deps</span></div></div>
+    <div class="a-card" style="--grd:linear-gradient(135deg,rgba(244,114,182,.07),rgba(236,72,153,.04))"><div class="a-icon">🚀</div><div class="a-name">DevOps Agent</div><div class="a-desc">SSH deploy, git pull, service restart, health check, auto-rollback on failure. Every release ships with zero touch.</div><div class="a-tags"><span class="tag tv">deploy</span><span class="tag tv">rollback</span><span class="tag tv">ssh</span></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head">
+    <div class="sec-eyebrow">The pipeline</div>
+    <div class="sec-title">Every release, <span>same flow.</span></div>
+    <div class="sec-sub">From intent to production in a single command.</div>
+  </div>
+  <div class="pipe-row">
+    <div class="pipe-line"></div>
+    <div class="p-node"><div class="p-ring pn0">01</div><div class="p-lbl">Intent</div><div class="p-sub">You → Starvox</div></div>
+    <div class="p-node"><div class="p-ring pn1">02</div><div class="p-lbl">Spec</div><div class="p-sub">PM Agent</div></div>
+    <div class="p-node"><div class="p-ring pn2">03</div><div class="p-lbl">Build</div><div class="p-sub">Dev ×N parallel</div></div>
+    <div class="p-node"><div class="p-ring pn3">04</div><div class="p-lbl">Test</div><div class="p-sub">QA + Security</div></div>
+    <div class="p-node"><div class="p-ring pn4">05</div><div class="p-lbl">Deploy</div><div class="p-sub">DevOps Agent</div></div>
+    <div class="p-node"><div class="p-ring pn5">06</div><div class="p-lbl">Monitor</div><div class="p-sub">24/7 watch</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head">
+    <div class="sec-eyebrow">From the field</div>
+    <div class="sec-title">What founders <span>are saying.</span></div>
+  </div>
+  <div class="testi-grid">
+    <div class="tcard"><div class="tcard-quote">Starvox took our product from idea to deployed API in under an hour. No human dev touched it.</div><div class="tcard-author"><div class="tcard-av">🧑‍💻</div><div><div class="tcard-name">Arjun Sharma</div><div class="tcard-role">CTO, FinStack · Bangalore</div></div></div></div>
+    <div class="tcard"><div class="tcard-quote">The Security Agent caught a JWT flaw in our auth layer that we'd had in prod for 6 months. Saved us before a DPDP audit.</div><div class="tcard-author"><div class="tcard-av">👩‍🚀</div><div><div class="tcard-name">Priya Nair</div><div class="tcard-role">Founder, Clearpath · Mumbai</div></div></div></div>
+    <div class="tcard"><div class="tcard-quote">I'm a solo founder running 4 products. Starvox is the team I couldn't afford to hire.</div><div class="tcard-author"><div class="tcard-av">🚀</div><div><div class="tcard-name">Rohit Verma</div><div class="tcard-role">Indie Builder · Hyderabad</div></div></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head">
+    <div class="sec-eyebrow">Pricing</div>
+    <div class="sec-title">Start free, <span>scale as you ship.</span></div>
+  </div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">Starter</div>
+      <div class="price-amt"><span class="price-usd">$</span>0</div>
+      <div class="price-period">Free forever</div>
+      <ul class="price-features">
+        <li>50 agent tasks/month</li>
+        <li>8 specialist agents</li>
+        <li>Shared sandbox</li>
+        <li>Community support</li>
+      </ul>
+      <button class="price-btn price-btn-outline">Start free →</button>
+    </div>
+    <div class="price-card featured">
+      <div class="price-badge">Most Popular</div>
+      <div class="price-tier">Pro</div>
+      <div class="price-amt"><span class="price-usd">$</span>49</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li>Unlimited agent tasks</li>
+        <li>All 16 agents</li>
+        <li>Dedicated build sandbox</li>
+        <li>SSH deploy + auto-rollback</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="price-btn price-btn-grad">Get Pro →</button>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">Scale</div>
+      <div class="price-amt"><span class="price-usd">$</span>199</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li>Everything in Pro</li>
+        <li>Multi-project workspace</li>
+        <li>Custom model routing</li>
+        <li>DPDP compliance mode</li>
+        <li>Dedicated Slack line</li>
+      </ul>
+      <button class="price-btn price-btn-outline">Contact us →</button>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-head">
+    <div class="sec-eyebrow">FAQ</div>
+    <div class="sec-title">Common <span>questions.</span></div>
+  </div>
+  <div class="faq">
+    <div class="faq-item open">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What exactly is Starvox?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Starvox is a self-hosted Master AI Company OS. It's a multi-agent system where 16 specialist AI agents (PM, frontend, backend, QA, security, DevOps, and more) collaborate to take your natural language intent and produce shipped, deployed, tested software — automatically.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How is this different from GitHub Copilot or Cursor?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Copilot and Cursor assist individual developers in their editor. Starvox replaces the entire delivery loop — spec, code, test, deploy, monitor — without a developer in the loop. It's a company-level OS, not a code autocomplete tool.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Which AI models does Starvox use?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Starvox routes tasks across 25 models from 10 providers — Claude, GPT-4o, Gemini, DeepSeek, Mistral, and more. The router picks the best model for each sub-task based on cost, speed, and capability profile. You can override routing rules per project.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is my code safe? Where does it run?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Starvox is self-hosted — your code never leaves your infrastructure. The build sandbox is an isolated container on your own machine. API calls go to your own provider accounts. We never store your code or API keys.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I use Starvox for my existing products?<span class="faq-arrow">▾</span></div>
+      <div class="faq-a">Yes. Starvox works on any existing codebase. Point it at your repo, describe a task, and the agents read your project context before writing or deploying anything. It's designed for portfolios of products, not just greenfield builds.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <div class="cta-inner">
+    <div class="cta-glow"></div>
+    <h2><span class="gtext">Ship your next product.<br>Today.</span></h2>
+    <p>No setup needed. Describe what you want and Starvox handles the rest.</p>
+    <button class="btn-primary">Start building free →</button>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-logo">Starvox</div>
+  <div class="foot-links"><a href="#">Agents</a><a href="#">Pricing</a><a href="#">Docs</a><a href="#">GitHub</a></div>
+  <div class="foot-copy">© 2025 Vaanilabs · India 🇮🇳 · All systems operational</div>
+</footer>
+</div>
+</body>
+</html>

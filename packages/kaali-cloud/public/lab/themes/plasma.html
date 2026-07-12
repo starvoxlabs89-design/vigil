@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starvox — Plasma</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;-webkit-font-smoothing:antialiased;color:#fff;background:#07010f;overflow-x:hidden}
+/* ANIMATED MESH GRADIENT */
+.mesh{position:fixed;inset:0;z-index:0;pointer-events:none}
+.mesh canvas{position:absolute;inset:0;width:100%;height:100%}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:16px 48px;display:flex;align-items:center;gap:20px;background:rgba(7,1,15,.6);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-logo{font-size:15px;font-weight:800;letter-spacing:-.02em;flex:1;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:rgba(255,255,255,.45);text-decoration:none;font-size:12.5px;transition:color .15s}
+.nav-links a:hover{color:#fff}
+.nav-cta{padding:9px 24px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#f472b6,#a78bfa,#38bdf8);background-size:200%;color:#fff;transition:all .3s;letter-spacing:.01em}
+.nav-cta:hover{background-position:100%;transform:translateY(-1px);box-shadow:0 8px 24px rgba(167,139,250,.4)}
+/* CONTENT */
+.wrap{position:relative;z-index:1}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:36px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#c4b5fd;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#f472b6;box-shadow:0 0 10px #f472b6;animation:live 1.5s ease-in-out infinite}
+@keyframes live{0%,100%{opacity:1;box-shadow:0 0 10px #f472b6,0 0 20px #f472b6}50%{opacity:.5;box-shadow:0 0 4px #f472b6}}
+.hero h1{font-size:clamp(48px,8.5vw,110px);font-weight:800;letter-spacing:-.055em;line-height:.88;margin-bottom:28px}
+.hero h1 .w1{background:linear-gradient(135deg,#fff,#f0abfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block}
+.hero h1 .w2{background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block}
+.hero h1 .w3{background:linear-gradient(135deg,#38bdf8,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;font-style:italic}
+.hero-sub{font-size:15px;color:rgba(255,255,255,.55);line-height:1.8;max-width:480px;margin:0 auto 48px}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:72px}
+.btn-plasma{padding:15px 36px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#f472b6,#a78bfa,#38bdf8);background-size:200%;color:#fff;transition:all .3s;box-shadow:0 8px 32px rgba(167,139,250,.35);letter-spacing:.01em}
+.btn-plasma:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 14px 48px rgba(167,139,250,.5)}
+.btn-ghost{padding:15px 36px;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);backdrop-filter:blur(8px);transition:all .2s}
+.btn-ghost:hover{color:#fff;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);transform:translateY(-2px)}
+/* STATS */
+.stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap;margin-bottom:0}
+.stat{text-align:center}
+.stat-n{font-size:48px;font-weight:800;letter-spacing:-.05em;line-height:1;margin-bottom:6px}
+.stat-n.c1{background:linear-gradient(135deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-n.c2{background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-n.c3{background:linear-gradient(135deg,#38bdf8,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-n.c4{background:linear-gradient(135deg,#4ade80,#facc15);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-l{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+/* DIVIDER */
+.glow-line{height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.4) 30%,rgba(56,189,248,.4) 70%,transparent);margin:80px 0;animation:line-pulse 4s ease-in-out infinite}
+@keyframes line-pulse{0%,100%{opacity:.6}50%{opacity:1}}
+/* AGENTS */
+.agents{padding:0 48px 80px;max-width:1100px;margin:0 auto}
+.sec-head{margin-bottom:48px;text-align:center}
+.sec-tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a78bfa;margin-bottom:12px;font-weight:600}
+.sec-title{font-size:clamp(26px,3.5vw,42px);font-weight:700;letter-spacing:-.03em}
+.sec-title span{background:linear-gradient(135deg,#f472b6,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.a-card{border-radius:16px;padding:24px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);backdrop-filter:blur(8px);transition:all .3s;cursor:default;position:relative;overflow:hidden}
+.a-card::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,var(--c1,rgba(244,114,182,.06)),var(--c2,rgba(167,139,250,.04)));opacity:0;transition:opacity .3s}
+.a-card:hover{transform:translateY(-5px);border-color:rgba(167,139,250,.3);box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 0 1px rgba(167,139,250,.2)}
+.a-card:hover::before{opacity:1}
+.a-icon{font-size:32px;margin-bottom:16px;position:relative;z-index:1}
+.a-name{font-size:15px;font-weight:700;margin-bottom:8px;position:relative;z-index:1}
+.a-desc{font-size:11.5px;color:rgba(255,255,255,.45);line-height:1.7;position:relative;z-index:1}
+.a-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;position:relative;z-index:1}
+.a-chip{font-size:9.5px;padding:3px 10px;border-radius:999px;font-weight:600;letter-spacing:.04em}
+.chip-pink{background:rgba(244,114,182,.12);border:1px solid rgba(244,114,182,.25);color:#f9a8d4}
+.chip-purple{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);color:#c4b5fd}
+.chip-blue{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);color:#7dd3fc}
+.chip-green{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.22);color:#86efac}
+/* PIPE */
+.pipe{padding:0 48px 80px;max-width:1000px;margin:0 auto}
+.pipe-nodes{display:flex;gap:0;position:relative;margin-top:48px}
+.pipe-line{position:absolute;top:36px;left:36px;right:36px;height:2px;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8,#4ade80);opacity:.35;border-radius:2px;animation:line-pulse 3s ease-in-out infinite}
+.p-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;z-index:1;cursor:default}
+.p-orb{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;transition:all .3s;position:relative}
+.p-orb::after{content:"";position:absolute;inset:-4px;border-radius:50%;opacity:0;transition:opacity .3s}
+.p-node:hover .p-orb{transform:translateY(-6px) scale(1.12)}
+.p-node:hover .p-orb::after{opacity:1}
+.p-lbl{font-size:11.5px;font-weight:700;color:#fff;text-align:center}
+.p-sub{font-size:9.5px;color:rgba(255,255,255,.3);text-align:center}
+/* CTA */
+.cta{padding:80px 48px;text-align:center}
+.cta-inner{max-width:780px;margin:0 auto;padding:80px 60px;border-radius:24px;position:relative;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)}
+.cta-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 80% 100% at 20% 50%,rgba(244,114,182,.12),transparent 60%),radial-gradient(ellipse 60% 80% at 80% 50%,rgba(56,189,248,.1),transparent 60%);pointer-events:none}
+.cta-inner h2{font-size:clamp(36px,5vw,64px);font-weight:800;letter-spacing:-.05em;line-height:.95;margin-bottom:20px;position:relative;z-index:1}
+.cta-inner h2 span{background:linear-gradient(135deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-inner p{color:rgba(255,255,255,.45);font-size:14px;margin-bottom:36px;position:relative;z-index:1}
+footer{padding:28px 48px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between}
+.foot-logo{font-size:14px;font-weight:800;letter-spacing:-.01em;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.foot-copy{font-size:11px;color:rgba(255,255,255,.25)}
+@media(max-width:768px){.agents-grid{grid-template-columns:1fr}.agents,.pipe,.cta{padding-left:20px;padding-right:20px}.stats{gap:28px}.pipe-nodes{flex-wrap:wrap;justify-content:center;gap:20px}.pipe-line{display:none}.nav-links{display:none}nav{padding:14px 20px}}
+</style>
+</head>
+<body>
+<!-- Animated mesh via canvas -->
+<div class="mesh"><canvas id="c"></canvas></div>
+<script>
+(function(){
+  const c=document.getElementById('c');
+  const ctx=c.getContext('2d');
+  const pts=[];
+  const cols=['#f472b6','#a78bfa','#38bdf8','#4ade80','#fb923c'];
+  function resize(){c.width=innerWidth;c.height=innerHeight}
+  resize();
+  window.addEventListener('resize',resize);
+  for(let i=0;i<8;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*300+200,col:cols[i%cols.length]});
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<-p.r||p.x>c.width+p.r)p.vx*=-1;
+      if(p.y<-p.r||p.y>c.height+p.r)p.vy*=-1;
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+      g.addColorStop(0,p.col+'28');
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<div class="wrap">
+<nav>
+  <div class="nav-logo">Starvox</div>
+  <div class="nav-links"><a href="#">Agents</a><a href="#">Products</a><a href="#">Pricing</a><a href="#">Docs</a></div>
+  <button class="nav-cta">Start free →</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag"><span class="live-dot"></span>16 agents · 25 models · live now</div>
+  <h1>
+    <span class="w1">The AI OS</span>
+    <span class="w2">that runs your</span>
+    <span class="w3">whole company.</span>
+  </h1>
+  <p class="hero-sub">Starvox turns a sentence into shipped, tested, deployed software — with 16 specialist agents working in parallel across your entire product portfolio.</p>
+  <div class="hero-btns">
+    <button class="btn-plasma">Start building free →</button>
+    <button class="btn-ghost">Watch demo</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n c1">16</div><div class="stat-l">Agents</div></div>
+    <div class="stat"><div class="stat-n c2">31</div><div class="stat-l">Tools</div></div>
+    <div class="stat"><div class="stat-n c3">25</div><div class="stat-l">Models</div></div>
+    <div class="stat"><div class="stat-n c4">$0.03</div><div class="stat-l">Per build</div></div>
+  </div>
+</section>
+
+<div class="glow-line"></div>
+
+<div class="agents">
+  <div class="sec-head">
+    <div class="sec-tag">Agent roster</div>
+    <div class="sec-title">An AI team that <span>never sleeps.</span></div>
+  </div>
+  <div class="agents-grid">
+    <div class="a-card" style="--c1:rgba(167,139,250,.08);--c2:rgba(124,58,237,.04)"><div class="a-icon">🎯</div><div class="a-name">PM Agent</div><div class="a-desc">Decomposes intent into spec, builds a subtask DAG, assigns work to the right specialists.</div><div class="a-chips"><span class="a-chip chip-purple">spec</span><span class="a-chip chip-purple">orchestrate</span></div></div>
+    <div class="a-card" style="--c1:rgba(56,189,248,.08);--c2:rgba(6,182,212,.04)"><div class="a-icon">🎨</div><div class="a-name">Frontend Dev</div><div class="a-desc">Builds pixel-perfect React/Vue UI. Knows your entire design system and brand language.</div><div class="a-chips"><span class="a-chip chip-blue">react</span><span class="a-chip chip-blue">css</span></div></div>
+    <div class="a-card" style="--c1:rgba(74,222,128,.07);--c2:rgba(16,185,129,.04)"><div class="a-icon">⚙️</div><div class="a-name">Backend Dev</div><div class="a-desc">APIs, DB schemas, integrations. Runs code in a sandbox and self-corrects until tests pass.</div><div class="a-chips"><span class="a-chip chip-green">fastapi</span><span class="a-chip chip-green">supabase</span></div></div>
+    <div class="a-card" style="--c1:rgba(251,146,60,.07);--c2:rgba(245,158,11,.04)"><div class="a-icon">🧪</div><div class="a-name">QA Agent</div><div class="a-desc">Writes and runs tests. Browser-driven UI flows. Catches regressions automatically.</div><div class="a-chips"><span class="a-chip chip-pink">testing</span><span class="a-chip chip-pink">browser</span></div></div>
+    <div class="a-card" style="--c1:rgba(248,113,113,.07);--c2:rgba(239,68,68,.04)"><div class="a-icon">🔒</div><div class="a-name">Security Agent</div><div class="a-desc">OWASP top 10, leaked keys, insecure deps — audited on every single release.</div><div class="a-chips"><span class="a-chip chip-pink">owasp</span><span class="a-chip chip-pink">audit</span></div></div>
+    <div class="a-card" style="--c1:rgba(244,114,182,.07);--c2:rgba(236,72,153,.04)"><div class="a-icon">🚀</div><div class="a-name">DevOps Agent</div><div class="a-desc">SSH deploy, git pull, health check, auto-rollback on failure. Every release, zero touch.</div><div class="a-chips"><span class="a-chip chip-purple">deploy</span><span class="a-chip chip-purple">rollback</span></div></div>
+  </div>
+</div>
+
+<div class="pipe" style="text-align:center">
+  <div class="sec-head">
+    <div class="sec-tag">The pipeline</div>
+    <div class="sec-title">Every release, <span>same flow.</span></div>
+  </div>
+  <div class="pipe-nodes">
+    <div class="pipe-line"></div>
+    <div class="p-node"><div class="p-orb" style="background:rgba(244,114,182,.12);border:1.5px solid rgba(244,114,182,.4);box-shadow:0 0 24px rgba(244,114,182,.25)">01</div><div class="p-lbl">Intent</div><div class="p-sub">You</div></div>
+    <div class="p-node"><div class="p-orb" style="background:rgba(167,139,250,.12);border:1.5px solid rgba(167,139,250,.4);box-shadow:0 0 24px rgba(167,139,250,.25)">02</div><div class="p-lbl">Spec</div><div class="p-sub">PM Agent</div></div>
+    <div class="p-node"><div class="p-orb" style="background:rgba(56,189,248,.12);border:1.5px solid rgba(56,189,248,.4);box-shadow:0 0 24px rgba(56,189,248,.25)">03</div><div class="p-lbl">Build</div><div class="p-sub">Dev ×N</div></div>
+    <div class="p-node"><div class="p-orb" style="background:rgba(251,146,60,.12);border:1.5px solid rgba(251,146,60,.4);box-shadow:0 0 24px rgba(251,146,60,.25)">04</div><div class="p-lbl">Test</div><div class="p-sub">QA + Sec</div></div>
+    <div class="p-node"><div class="p-orb" style="background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.4);box-shadow:0 0 24px rgba(248,113,113,.25)">05</div><div class="p-lbl">Deploy</div><div class="p-sub">DevOps</div></div>
+    <div class="p-node"><div class="p-orb" style="background:rgba(74,222,128,.12);border:1.5px solid rgba(74,222,128,.4);box-shadow:0 0 24px rgba(74,222,128,.25)">06</div><div class="p-lbl">Monitor</div><div class="p-sub">24/7</div></div>
+  </div>
+</div>
+
+<div class="cta">
+  <div class="cta-inner">
+    <div class="cta-mesh"></div>
+    <h2><span>Ship your next product.<br>Today.</span></h2>
+    <p>No setup needed. Just describe what you want to build.</p>
+    <button class="btn-plasma">Open Starvox free →</button>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-logo">Starvox</div>
+  <div class="foot-copy">© 2025 Vaanilabs · Made in India 🇮🇳</div>
+</footer>
+</div>
+</body>
+</html>

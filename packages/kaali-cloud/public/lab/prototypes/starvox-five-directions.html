@@ -1,0 +1,461 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Starvox — Five Directions</title>
+<style>
+  :root{
+    --void:#070709;
+    --surface:#0E0E14;
+    --line:rgba(232,233,240,.10);
+    --line-strong:rgba(232,233,240,.22);
+    --ink:#E8E9F0;
+    --dim:#8A8C9C;
+    --faint:#54566A;
+    --disp:"Futura","Avenir Next Condensed","Arial Narrow",system-ui,sans-serif;
+    --body:"Avenir Next","Helvetica Neue",system-ui,sans-serif;
+    --mono:"SF Mono","Menlo","JetBrains Mono",monospace;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--void);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;margin:0;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 28px}
+  ::selection{background:#FFB042;color:#070709}
+  a{color:inherit}
+  :focus-visible{outline:2px solid #FFB042;outline-offset:3px}
+
+  /* ---------- intro ---------- */
+  header.intro{padding:84px 0 56px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+  header.intro h1{font-family:var(--disp);font-weight:800;font-size:clamp(44px,8vw,110px);line-height:.92;text-transform:uppercase;letter-spacing:.005em;margin:16px 0 20px;text-wrap:balance}
+  header.intro p{color:var(--dim);max-width:60ch;margin:0}
+  .toc{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:30px;font-family:var(--mono);font-size:12px}
+  .toc a{text-decoration:none;color:var(--dim);letter-spacing:.06em}
+  .toc a b{color:var(--ink);font-weight:500}
+  .toc a:hover{color:var(--ink)}
+
+  /* ---------- option shell ---------- */
+  .opt{border-top:1px solid var(--line);padding:76px 0 84px}
+  .opt-head{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap;margin-bottom:10px}
+  .opt-num{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.2em}
+  .opt h2{font-family:var(--disp);font-weight:800;font-size:clamp(34px,5.6vw,64px);line-height:.95;text-transform:uppercase;margin:0}
+  .opt h2 .a{color:var(--accent)}
+  .thesis{font-size:18px;color:var(--dim);max-width:62ch;margin:12px 0 30px}
+  .thesis b{color:var(--ink);font-weight:600}
+  .demo{position:relative;aspect-ratio:16/8;background:var(--surface);border:1px solid var(--line);overflow:hidden;margin-bottom:34px}
+  .demo canvas{position:absolute;inset:0;width:100%;height:100%}
+  .demo .tag{position:absolute;top:12px;left:14px;font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase;z-index:2}
+  .demo .tag em{color:var(--accent);font-style:normal}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+  @media(max-width:900px){.grid4{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.grid4{grid-template-columns:1fr}}
+  .cell{background:var(--void);padding:20px 18px}
+  .cell h4{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;font-weight:500}
+  .cell p{font-size:13.5px;color:var(--dim);margin:0;line-height:1.65}
+  .cell p b{color:var(--ink);font-weight:600}
+
+  /* per-option accents */
+  #opt1{--accent:#FFB042}
+  #opt2{--accent:#7DF3FF}
+  #opt3{--accent:#D9FF3D}
+  #opt4{--accent:#E0432D}
+  #opt5{--accent:#C99BFF}
+  /* option 4 is a light editorial island */
+  #opt4 .demo{background:#EFECE3;border-color:rgba(20,18,14,.15)}
+
+  /* ---------- verdict ---------- */
+  .verdict{border-top:1px solid var(--line-strong);padding:80px 0 70px}
+  .verdict h2{font-family:var(--disp);font-weight:800;font-size:clamp(32px,5vw,56px);text-transform:uppercase;line-height:.95;margin:14px 0 26px}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--line);margin:8px 0 36px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);text-align:left;font-weight:500;padding:12px 14px;border-bottom:1px solid var(--line-strong);white-space:nowrap}
+  td{padding:13px 14px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:top}
+  td:first-child{color:var(--ink);white-space:nowrap;font-weight:600}
+  tr:last-child td{border-bottom:0}
+  td .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+  .call{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+  @media(max-width:760px){.call{grid-template-columns:1fr}}
+  .call p{color:var(--dim);font-size:15px;margin:0 0 16px;max-width:60ch}
+  .call p b{color:var(--ink);font-weight:600}
+  .call .pick{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#FFB042;margin-bottom:10px}
+  footer{border-top:1px solid var(--line);padding:26px 0;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.14em}
+</style>
+
+<header class="intro">
+  <div class="wrap">
+    <span class="kicker">starvoxlabs.io · creative concepts · choose one sky</span>
+    <h1>Five<br>Directions</h1>
+    <p>Five genuinely different sites, not five skins of one idea. Each sketch below is live — move your cursor through them. Every option is built to win at Awwwards; they differ in what they bet on, what they cost, and how high the ceiling goes.</p>
+    <div class="toc">
+      <a href="#opt1"><b>01</b> The Live Constellation</a>
+      <a href="#opt2"><b>02</b> The Voyage</a>
+      <a href="#opt3"><b>03</b> The Millisecond</a>
+      <a href="#opt4"><b>04</b> The Broadsheet</a>
+      <a href="#opt5"><b>05</b> The Vox</a>
+    </div>
+  </div>
+</header>
+
+<!-- ================= OPTION 1 ================= -->
+<section class="opt" id="opt1">
+  <div class="wrap">
+    <div class="opt-head"><span class="opt-num">OPTION 01</span><h2>The Live <span class="a">Constellation</span></h2></div>
+    <p class="thesis"><b>The site runs on the product, visibly.</b> A cinematic star-field where every star is a real request through the gateway — color is latency, brightness is traffic. Scroll reorganizes the sky into each product: streams, graph, orbit.</p>
+    <div class="demo"><canvas data-demo="const"></canvas><span class="tag"><em>LIVE SKETCH</em> · TELEMETRY SKY</span></div>
+    <div class="grid4">
+      <div class="cell"><h4>Narrative</h4><p>Six acts, one artifact. Ignition loader → living sky → Gateway streams → Workflow graph → Company OS orbit → a footer that publishes the site's own p99. <b>The story is evidence, not metaphor.</b></p></div>
+      <div class="cell"><h4>Signature moment</h4><p>Hovering a star and watching it resolve into a real model card — live p50, real cost. The juror realizes the sky isn't decoration. That's the screenshot that travels.</p></div>
+      <div class="cell"><h4>Stack &amp; effort</h4><p>Next.js + Three.js/TSL + GSAP + Lenis + one SSE telemetry endpoint. <b>~4 weeks.</b> Medium risk — particle choreography is proven tech; the telemetry feed is the only novel plumbing.</p></div>
+      <div class="cell"><h4>Awwwards read</h4><p>The unclaimed conceit — no site on Awwwards is driven by live production data. Channels monopo's one-shader discipline + Shopify Globe's realness. <b>Ceiling: SOTD certain-contender, SOTM possible.</b></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OPTION 2 ================= -->
+<section class="opt" id="opt2">
+  <div class="wrap">
+    <div class="opt-head"><span class="opt-num">OPTION 02</span><h2>The <span class="a">Voyage</span></h2></div>
+    <p class="thesis"><b>Ride a request through the machine.</b> The whole site is one continuous camera flight: you enter as a token and travel the pipeline — tokenizer, router, model, back out — at request speed. Products are stations, not pages. Active Theory energy, Bruno Simon soul.</p>
+    <div class="demo"><canvas data-demo="voyage"></canvas><span class="tag"><em>LIVE SKETCH</em> · PIPELINE FLIGHT</span></div>
+    <div class="grid4">
+      <div class="cell"><h4>Narrative</h4><p>Scroll = throttle. You fly through glowing gates (auth → route → infer → return), each gate a product chapter rendered in-world. Nav is a star map. <b>The infrastructure is a place you visit.</b></p></div>
+      <div class="cell"><h4>Signature moment</h4><p>The router gate: your token splits into 25 light-trails, one per model, and the camera follows the fastest. Nobody has rendered an inference pipeline as a world — the device is sitting there unclaimed.</p></div>
+      <div class="cell"><h4>Stack &amp; effort</h4><p>Three.js/WebGPU, custom shaders, camera-on-spline, heavy asset work. <b>8–12 weeks</b>, and it needs real 3D art direction. High risk: this is agency-flagship territory.</p></div>
+      <div class="cell"><h4>Awwwards read</h4><p>The SOTY swing. Experience sites score highest (Oryzo 7.86, Messenger won Developer SOTY as a literal game). But mobile parity is brutal and one mediocre chapter sinks the whole flight. <b>Ceiling: SOTM–SOTY. Floor: expensive miss.</b></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OPTION 3 ================= -->
+<section class="opt" id="opt3">
+  <div class="wrap">
+    <div class="opt-head"><span class="opt-num">OPTION 03</span><h2>The <span class="a">Millisecond</span></h2></div>
+    <p class="thesis"><b>F1 for inference.</b> Lando Norris made speed a design language for a driver; we make it one for milliseconds. Fluorescent light-trails, scroll-scrubbed races, condensed italic type at brutal scale — every animation runs at a real, measured duration.</p>
+    <div class="demo"><canvas data-demo="ms"></canvas><span class="tag"><em>LIVE SKETCH</em> · REAL-TIME RACES</span></div>
+    <div class="grid4">
+      <div class="cell"><h4>Narrative</h4><p>The homepage is a timing tower. Requests race across the viewport in their true durations; sections are laps (Gateway, Workflow, Company OS); a leaderboard ranks the 25+ models by live p50. <b>Speed is the brand, proof is the content.</b></p></div>
+      <div class="cell"><h4>Signature moment</h4><p>"Race the gateway": press and hold — a light bar crosses the screen in exactly one real p50 (~214ms) while your reflex tries to release in time. Visitors replay it, then screenshot their score. Built-in virality.</p></div>
+      <div class="cell"><h4>Stack &amp; effort</h4><p>GSAP + Lenis + light WebGL trails — mostly 2D craft, no heavy 3D. <b>~3 weeks.</b> Low-medium risk; the hard part is copy and restraint, not tech.</p></div>
+      <div class="cell"><h4>Awwwards read</h4><p>Channels the reigning Site of the Year's kinetic language but applied to an unclaimed subject (latency). Fourmula AI proved no-WebGL SOTD is winnable on animation craft alone. <b>Ceiling: SOTD strong, SOTM stretch.</b></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OPTION 4 ================= -->
+<section class="opt" id="opt4">
+  <div class="wrap">
+    <div class="opt-head"><span class="opt-num">OPTION 04</span><h2>The <span class="a">Broadsheet</span></h2></div>
+    <p class="thesis"><b>A beautifully typeset systems paper, alive.</b> While every AI company ships dark-glow-bento, we ship ink on paper: visible grid, kinetic editorial typography, dense/calm pacing — the Obys playbook aimed at infrastructure. The contrarian pick.</p>
+    <div class="demo"><canvas data-demo="edit"></canvas><span class="tag"><em>LIVE SKETCH</em> · KINETIC TYPE ON GRID</span></div>
+    <div class="grid4">
+      <div class="cell"><h4>Narrative</h4><p>Reads like the definitive paper on AI infrastructure — abstract, figures, appendix — except every figure is live and every headline moves. Products are chapters with real diagrams, real numbers, footnoted claims. <b>Authority as aesthetic.</b></p></div>
+      <div class="cell"><h4>Signature moment</h4><p>Headlines typeset themselves as you scroll — letters sliding into the grid like a press laying type — and one "figure" is a live gateway chart rendered in print style. Screenshots look like no other AI site on earth.</p></div>
+      <div class="cell"><h4>Stack &amp; effort</h4><p>GSAP + custom smooth scroll + SVG/canvas figures. No heavy WebGL. <b>2–3 weeks</b> — the cheapest and fastest option. Risk is craft-dependence: with average typography it's just a document.</p></div>
+      <div class="cell"><h4>Awwwards read</h4><p>Obys proved editorial wins for deep tech (Glyphic, biotech). Design is 40% of the score and juries are visibly template-fatigued. <b>Ceiling: SOTD on pure design merit. Weakness: lower "wow" for casual visitors.</b></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OPTION 5 ================= -->
+<section class="opt" id="opt5">
+  <div class="wrap">
+    <div class="opt-head"><span class="opt-num">OPTION 05</span><h2>The <span class="a">Vox</span></h2></div>
+    <p class="thesis"><b>The voice of the machine.</b> Starvox = star + voice — so the brand is a single living waveform: an iridescent voiceprint that speaks. It reacts to your cursor, pulses with real traffic, and "pronounces" each section as you scroll. One perfect shader as the entire identity.</p>
+    <div class="demo"><canvas data-demo="vox"></canvas><span class="tag"><em>LIVE SKETCH</em> · THE WAVEFORM — TOUCH IT</span></div>
+    <div class="grid4">
+      <div class="cell"><h4>Narrative</h4><p>The waveform is a character. It hums on the homepage, splits into 25 harmonics for the Gateway, knots into rhythm for Workflows, settles into a steady pulse for Company OS. Optional sound design makes it literal. <b>One shader, whole brand.</b></p></div>
+      <div class="cell"><h4>Signature moment</h4><p>Speak-to-the-site: click the mic and the waveform mirrors <em>your</em> voice, then answers with the gateway's — your words routed through a real model, visualized live. AI you can see listening.</p></div>
+      <div class="cell"><h4>Stack &amp; effort</h4><p>One custom fragment shader (OGL or Three.js) + GSAP + WebAudio. <b>2–3 weeks.</b> Low risk, high polish-sensitivity — monopo's exact economics: one shader ≈ 90% of the feeling at 5% of the cost.</p></div>
+      <div class="cell"><h4>Awwwards read</h4><p>Channels monopo london (SOTD + Dev Award on essentially one mouse-reactive shader). The mic moment gives it a creativity spike juries remember. <b>Ceiling: SOTD. Sleeper pick — punches far above its build cost.</b></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERDICT ================= -->
+<section class="verdict">
+  <div class="wrap">
+    <span class="kicker">the comparison — and my call</span>
+    <h2>Side by side</h2>
+    <div class="tbl-wrap"><table>
+      <tr><th>Direction</th><th>The bet</th><th>Effort</th><th>Risk</th><th>Ceiling</th><th>What the juror writes down</th></tr>
+      <tr><td><span class="dot" style="background:#FFB042"></span>01 Constellation</td><td>Truth as spectacle</td><td>~4 wks</td><td>Medium</td><td>SOTD–SOTM</td><td>"The sky is their actual traffic."</td></tr>
+      <tr><td><span class="dot" style="background:#7DF3FF"></span>02 Voyage</td><td>Infrastructure as a world</td><td>8–12 wks</td><td>High</td><td>SOTM–SOTY</td><td>"I flew through an inference pipeline."</td></tr>
+      <tr><td><span class="dot" style="background:#D9FF3D"></span>03 Millisecond</td><td>Speed as identity</td><td>~3 wks</td><td>Low-med</td><td>SOTD+</td><td>"I raced their p50 and lost."</td></tr>
+      <tr><td><span class="dot" style="background:#E0432D"></span>04 Broadsheet</td><td>Authority as aesthetic</td><td>2–3 wks</td><td>Low</td><td>SOTD</td><td>"An AI site that looks like literature."</td></tr>
+      <tr><td><span class="dot" style="background:#C99BFF"></span>05 Vox</td><td>One shader, whole brand</td><td>2–3 wks</td><td>Low</td><td>SOTD</td><td>"The waveform listened to me."</td></tr>
+    </table></div>
+    <div class="call">
+      <div>
+        <p class="pick">My call · primary</p>
+        <p><b>01 — The Live Constellation.</b> It's the only direction with an unclaimed conceit ("real data as beauty"), it demonstrates the product while being beautiful, and it absorbs the best of the others: the Millisecond's motion physics, the Broadsheet's typography, the Vox's one-artifact discipline are already inside it. Best ratio of ceiling to risk, and the story writes its own press.</p>
+      </div>
+      <div>
+        <p class="pick">If we swing bigger · or leaner</p>
+        <p><b>Swing: 02 — The Voyage</b>, if you'll spend 3 months and want a Site-of-the-Year attempt rather than SOTD. It has the highest ceiling of the five and nobody has claimed the device. <b>Lean: 05 — The Vox</b>, if we want award-tier in 3 weeks — monopo economics, plus the mic moment as the creativity spike. The honest anti-pick: 04 is gorgeous but its "wow" depends entirely on typographic execution the jury may under-reward on a product site.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">STARVOX LABS · FIVE DIRECTIONS · JULY 2026 — ALL SKETCHES RENDER LIVE IN CANVAS; PRODUCTION IS WEBGL WITH BLOOM, DOF &amp; REAL TELEMETRY</div></footer>
+
+<script>
+(function(){
+"use strict";
+var reduced=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function lerp(a,b,t){return a+(b-a)*t}
+function makeSprite(rgb,size){
+  var c=document.createElement("canvas");c.width=c.height=size;
+  var g=c.getContext("2d"),gr=g.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+  gr.addColorStop(0,"rgba("+rgb+",1)");gr.addColorStop(.2,"rgba("+rgb+",.5)");
+  gr.addColorStop(.55,"rgba("+rgb+",.12)");gr.addColorStop(1,"rgba("+rgb+",0)");
+  g.fillStyle=gr;g.fillRect(0,0,size,size);return c;
+}
+var SP_HOT=makeSprite("168,200,255",64),SP_WHT=makeSprite("232,233,240",64),
+    SP_SOL=makeSprite("255,176,66",64),SP_EMB=makeSprite("255,107,71",64),
+    SP_CYA=makeSprite("125,243,255",64),SP_LIM=makeSprite("217,255,61",64),
+    SP_VIO=makeSprite("201,155,255",64);
+function sprTemp(t){return t<.22?SP_HOT:t<.55?SP_WHT:t<.82?SP_SOL:SP_EMB}
+function makeNebula(rgb){
+  var c=document.createElement("canvas");c.width=c.height=512;
+  var g=c.getContext("2d");
+  for(var i=0;i<5;i++){
+    var x=128+Math.sin(i*2.4)*110,y=128+Math.cos(i*1.7)*100,r=120+i*40;
+    var gr=g.createRadialGradient(x+128,y+128,0,x+128,y+128,r);
+    gr.addColorStop(0,"rgba("+rgb+",.28)");gr.addColorStop(1,"rgba("+rgb+",0)");
+    g.fillStyle=gr;g.fillRect(0,0,512,512);
+  }
+  return c;
+}
+var NEB_BLUE=makeNebula("70,110,220"),NEB_AMBER=makeNebula("255,140,50"),NEB_VIO=makeNebula("140,80,220");
+
+function fit(cv){
+  var dpr=Math.min(devicePixelRatio||1,2),r=cv.getBoundingClientRect();
+  if(!r.width)return null;
+  cv.width=r.width*dpr;cv.height=r.height*dpr;
+  var g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);
+  return{g:g,w:r.width,h:r.height};
+}
+function drawStar(g,spr,x,y,r,alpha){
+  var gs=r*9;
+  g.globalAlpha=alpha*.85;g.drawImage(spr,x-gs/2,y-gs/2,gs,gs);
+  g.globalAlpha=alpha;g.fillStyle="#fff";
+  g.beginPath();g.arc(x,y,Math.min(r*.5,1.3),0,6.28);g.fill();
+  g.globalAlpha=1;
+}
+
+var DEMOS=[],MX={},MY={};
+document.querySelectorAll("[data-demo]").forEach(function(cv){
+  var d={cv:cv,S:fit(cv),mode:cv.getAttribute("data-demo"),vis:false,st:{}};
+  init(d);DEMOS.push(d);
+  cv.parentElement.addEventListener("pointermove",function(e){
+    var r=cv.getBoundingClientRect();MX[d.mode]=e.clientX-r.left;MY[d.mode]=e.clientY-r.top;
+  });
+});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){
+  var d=DEMOS.find(function(x){return x.cv===e.target});if(d)d.vis=e.isIntersecting;
+})},{rootMargin:"80px"});
+DEMOS.forEach(function(d){io.observe(d.cv)});
+addEventListener("resize",function(){DEMOS.forEach(function(d){d.S=fit(d.cv)})});
+
+function init(d){
+  var st=d.st;
+  if(d.mode==="const"){
+    st.stars=[];for(var i=0;i<130;i++)st.stars.push({bx:Math.random(),by:Math.random(),r:.5+Math.pow(Math.random(),2)*2.2,t:Math.pow(Math.random(),1.6),tw:Math.random()*6.28,ts:.4+Math.random()*1.4,dx:(Math.random()-.5)*.1,dy:(Math.random()-.5)*.1});
+    st.streaks=[];st.lastReq=0;
+  }
+  if(d.mode==="voyage"){
+    st.pts=[];for(var i2=0;i2<240;i2++)st.pts.push({x:(Math.random()-.5)*2,y:(Math.random()-.5)*2,z:Math.random()});
+    st.rings=[];st.lastRing=0;
+  }
+  if(d.mode==="ms"){
+    st.lines=[];for(var i3=0;i3<26;i3++)st.lines.push({y:Math.random(),sp:2+Math.random()*8,len:.08+Math.random()*.2,x:Math.random()*1.4,a:.06+Math.random()*.2});
+    st.race=null;st.nextRace=0;st.durs=[214,102,388,97,167];st.di=0;
+  }
+  if(d.mode==="edit"){
+    st.words=["SIGNAL","INFRA","SCALE","TRUST"];st.wi=0;st.t0=0;
+  }
+  if(d.mode==="vox"){
+    st.ribbons=[];for(var i4=0;i4<6;i4++)st.ribbons.push({off:(i4-2.5)*14,f:.008+i4*.0016,sp:.9+i4*.25,amp:14+i4*5});
+  }
+}
+
+function draw(d,now){
+  if(!d.S){d.S=fit(d.cv);if(!d.S)return}
+  var g=d.S.g,w=d.S.w,h=d.S.h,st=d.st,mx=MX[d.mode]!==undefined?MX[d.mode]:-9e3,my=MY[d.mode]!==undefined?MY[d.mode]:-9e3;
+  g.globalCompositeOperation="source-over";
+  g.clearRect(0,0,w,h);
+
+  /* ---- 01 CONSTELLATION ---- */
+  if(d.mode==="const"){
+    g.globalCompositeOperation="lighter";
+    var nb=Math.max(w,h)*1.2;
+    g.globalAlpha=.45;g.drawImage(NEB_BLUE,w*.45+Math.sin(now/21000)*w*.15-nb/2,h*.3-nb/2,nb,nb);
+    g.globalAlpha=.35;g.drawImage(NEB_AMBER,w*.75-nb*.4,h*.65+Math.cos(now/18000)*h*.1-nb*.4,nb*.8,nb*.8);
+    g.globalAlpha=1;
+    st.stars.forEach(function(a){
+      a.bx=(a.bx+a.dx/w+1)%1;a.by=(a.by+a.dy/h+1)%1;
+      var x=a.bx*w,y=a.by*h,ddx=mx-x,ddy=my-y,d2=ddx*ddx+ddy*ddy;
+      if(d2<25600){var f=(1-Math.sqrt(d2)/160)*26;x+=ddx/Math.sqrt(d2+1)*f;y+=ddy/Math.sqrt(d2+1)*f}
+      a.x=x;a.y=y;
+    });
+    g.lineWidth=1;
+    for(var i=0;i<st.stars.length;i+=2)for(var j=i+2;j<Math.min(i+20,st.stars.length);j+=2){
+      var A=st.stars[i],B=st.stars[j],dx=A.x-B.x,dy=A.y-B.y;
+      if(dx*dx+dy*dy<6400){
+        var mxx=(A.x+B.x)/2-mx,myy=(A.y+B.y)/2-my,near=Math.max(0,1-Math.sqrt(mxx*mxx+myy*myy)/240);
+        g.strokeStyle="rgba(168,200,255,"+(.06+near*.28)+")";
+        g.beginPath();g.moveTo(A.x,A.y);g.lineTo(B.x,B.y);g.stroke();
+      }
+    }
+    st.stars.forEach(function(s){drawStar(g,sprTemp(s.t),s.x,s.y,s.r,.5+.5*Math.abs(Math.sin(s.tw+now/1000*s.ts)))});
+    if(now-st.lastReq>600+Math.random()*900){st.lastReq=now;st.streaks.push({x:-60,y:h*(.1+Math.random()*.7),v:w/(0.4+Math.random()),t:Math.random()})}
+    for(var q=st.streaks.length-1;q>=0;q--){
+      var s2=st.streaks[q];s2.x+=s2.v/60;
+      if(s2.x>w+80){st.streaks.splice(q,1);continue}
+      var gr=g.createLinearGradient(s2.x-120,s2.y,s2.x,s2.y);
+      gr.addColorStop(0,"rgba(168,200,255,0)");gr.addColorStop(1,"rgba(255,200,120,.9)");
+      g.strokeStyle=gr;g.lineWidth=1.8;
+      g.beginPath();g.moveTo(s2.x-120,s2.y);g.lineTo(s2.x,s2.y);g.stroke();
+      g.drawImage(sprTemp(s2.t),s2.x-13,s2.y-13,26,26);
+    }
+  }
+
+  /* ---- 02 VOYAGE ---- */
+  if(d.mode==="voyage"){
+    g.globalCompositeOperation="lighter";
+    var nb2=Math.max(w,h)*1.3;
+    g.globalAlpha=.3;g.drawImage(NEB_VIO,w/2-nb2/2,h/2-nb2/2,nb2,nb2);g.globalAlpha=1;
+    var cx=w/2+(mx>-9e3?(mx-w/2)*.12:0),cy=h/2+(my>-9e3?(my-h/2)*.12:0);
+    var speed=.0045;
+    st.pts.forEach(function(p){
+      var pz=p.z;p.z-=speed;if(p.z<=.02){p.z=1;p.x=(Math.random()-.5)*2;p.y=(Math.random()-.5)*2;pz=p.z}
+      var k1=.5/pz,k0=.5/(pz+speed*2);
+      var x1=cx+p.x*w*k1*.9,y1=cy+p.y*h*k1*.9,x0=cx+p.x*w*k0*.9,y0=cy+p.y*h*k0*.9;
+      if(x1<-40||x1>w+40||y1<-40||y1>h+40)return;
+      var a=Math.min((1-p.z)*1.4,1);
+      g.strokeStyle="rgba(125,243,255,"+(a*.75)+")";g.lineWidth=Math.min(2.4/pz*.5,3);
+      g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+    });
+    if(now-st.lastRing>1500){st.lastRing=now;st.rings.push({z:1})}
+    for(var r2=st.rings.length-1;r2>=0;r2--){
+      var R=st.rings[r2];R.z-=speed;
+      if(R.z<=.03){st.rings.splice(r2,1);continue}
+      var rad=.5/R.z*Math.min(w,h)*.28,a2=Math.min((1-R.z)*1.2,1)*Math.min(R.z*8,1);
+      g.strokeStyle="rgba(125,243,255,"+(a2*.5)+")";g.lineWidth=1.5;
+      g.beginPath();g.ellipse(cx,cy,rad*1.4,rad,0,0,6.28);g.stroke();
+    }
+    g.drawImage(SP_CYA,cx-30,cy-30,60,60);
+  }
+
+  /* ---- 03 MILLISECOND ---- */
+  if(d.mode==="ms"){
+    g.globalCompositeOperation="lighter";
+    st.lines.forEach(function(L){
+      L.x+=L.sp/300;if(L.x>1.4)L.x=-L.len;
+      var y=L.y*h;
+      var gr2=g.createLinearGradient((L.x-L.len)*w,y,L.x*w,y);
+      gr2.addColorStop(0,"rgba(217,255,61,0)");gr2.addColorStop(1,"rgba(217,255,61,"+L.a+")");
+      g.strokeStyle=gr2;g.lineWidth=1.4;
+      g.beginPath();g.moveTo((L.x-L.len)*w,y);g.lineTo(L.x*w,y);g.stroke();
+    });
+    if(!st.race&&now>st.nextRace){st.race={t0:now,dur:st.durs[st.di++%st.durs.length]}}
+    var elapsed=0,frac=0;
+    if(st.race){
+      elapsed=now-st.race.t0;frac=Math.min(elapsed/st.race.dur,1);
+      var rx=frac*w,ry=h*.58;
+      var gr3=g.createLinearGradient(rx-w*.35,ry,rx,ry);
+      gr3.addColorStop(0,"rgba(217,255,61,0)");gr3.addColorStop(1,"rgba(217,255,61,.95)");
+      g.strokeStyle=gr3;g.lineWidth=4;
+      g.beginPath();g.moveTo(rx-w*.35,ry);g.lineTo(rx,ry);g.stroke();
+      g.drawImage(SP_LIM,rx-22,ry-22,44,44);
+      if(frac>=1){st.nextRace=now+1100;if(elapsed>st.race.dur+50){st.race=null}}
+    }
+    /* giant timing readout */
+    g.globalAlpha=.92;
+    g.fillStyle="rgba(217,255,61,.9)";
+    g.font="700 "+Math.min(w*.13,110)+"px Futura, Avenir Next Condensed, sans-serif";
+    g.textAlign="center";
+    var shown=st.race?Math.min(elapsed,st.race.dur):(st.lastShown||0);
+    if(st.race)st.lastShown=shown;
+    g.fillText((shown|0)+"ms",w/2,h*.42);
+    g.globalAlpha=.5;g.font="11px SF Mono, Menlo, monospace";
+    g.fillText("REAL DURATION · GATEWAY p50",w/2,h*.42+22);
+    g.globalAlpha=1;g.textAlign="left";
+    /* start/finish posts */
+    g.fillStyle="rgba(232,233,240,.25)";
+    g.fillRect(0,h*.5,1.5,h*.16);g.fillRect(w-1.5,h*.5,1.5,h*.16);
+  }
+
+  /* ---- 04 BROADSHEET (light) ---- */
+  if(d.mode==="edit"){
+    g.fillStyle="#EFECE3";g.fillRect(0,0,w,h);
+    /* grid */
+    g.strokeStyle="rgba(20,18,14,.08)";g.lineWidth=1;
+    var cols=12,cw=w/cols;
+    for(var c2=1;c2<cols;c2++){g.beginPath();g.moveTo(c2*cw,0);g.lineTo(c2*cw,h);g.stroke()}
+    g.strokeStyle="rgba(20,18,14,.15)";
+    g.beginPath();g.moveTo(0,h*.7);g.lineTo(w,h*.7);g.stroke();
+    if(!st.t0)st.t0=now;
+    var cyc=2600,el=(now-st.t0)%cyc,word=st.words[(((now-st.t0)/cyc)|0)%st.words.length];
+    var fs=Math.min(w*.16,150);
+    g.font="800 "+fs+"px Futura, Avenir Next Condensed, sans-serif";
+    g.textAlign="left";g.textBaseline="alphabetic";
+    var total=g.measureText(word).width,x0=(w-total)/2,baseY=h*.7-8;
+    for(var li=0;li<word.length;li++){
+      var ch=word[li],cw2=g.measureText(ch).width;
+      var din=Math.max(0,Math.min((el-li*90)/420,1)),ein=1-Math.pow(1-din,3);
+      var dout=Math.max(0,Math.min((el-(cyc-500)-li*40)/300,1));
+      var yOff=(1-ein)*fs*.9+dout*(-fs*.9);
+      g.save();
+      g.beginPath();g.rect(x0-4,baseY-fs*1.05,cw2+8,fs*1.25);g.clip();
+      g.fillStyle="#14120E";
+      g.fillText(ch,x0,baseY+yOff);
+      g.restore();
+      x0+=cw2;
+    }
+    /* red marker + annotations */
+    g.fillStyle="#E0432D";g.fillRect((w-total)/2,h*.7+6,total*Math.min(el/(cyc*.5),1),3);
+    g.fillStyle="rgba(20,18,14,.55)";g.font="10px SF Mono, Menlo, monospace";
+    g.fillText("FIG 1.1 — HEADLINE SETS ITSELF INTO THE GRID",w*.04,h*.12);
+    g.textAlign="right";g.fillText("COL 3–10 · BASELINE 8PT · INK #14120E",w*.96,h*.9);
+    g.textAlign="left";
+  }
+
+  /* ---- 05 VOX ---- */
+  if(d.mode==="vox"){
+    g.globalCompositeOperation="lighter";
+    var nb3=Math.max(w,h)*1.2;
+    g.globalAlpha=.3;g.drawImage(NEB_VIO,w/2-nb3/2,h/2-nb3/2,nb3,nb3);g.globalAlpha=1;
+    var cy2=h/2,grad=g.createLinearGradient(0,0,w,0);
+    grad.addColorStop(0,"#8A5CFF");grad.addColorStop(.45,"#4DD8C8");grad.addColorStop(1,"#FF9A5C");
+    st.ribbons.forEach(function(R,ri){
+      var pull=1;
+      g.beginPath();
+      for(var x=0;x<=w;x+=6){
+        var env=1;
+        if(mx>-9e3){var dxm=(x-mx)/ (w*.18);env=1+2.6*Math.exp(-dxm*dxm)*(1-Math.min(Math.abs(my-cy2)/(h*.6),1))}
+        var y=cy2+R.off+Math.sin(x*R.f+now/1000*R.sp)*R.amp*env
+              +Math.sin(x*R.f*2.7+now/700*R.sp)*R.amp*.3*env;
+        if(x===0)g.moveTo(x,y);else g.lineTo(x,y);
+      }
+      g.strokeStyle=grad;
+      g.globalAlpha=.10;g.lineWidth=7;g.stroke();
+      g.globalAlpha=.55;g.lineWidth=1.4;g.stroke();
+      g.globalAlpha=1;
+    });
+    /* center pulse */
+    var pb=26+8*Math.sin(now/500);
+    g.drawImage(SP_VIO,w/2-pb,cy2-pb,pb*2,pb*2);
+  }
+  g.globalCompositeOperation="source-over";
+}
+
+function loop(now){
+  DEMOS.forEach(function(d){if(d.vis)draw(d,now)});
+  requestAnimationFrame(loop);
+}
+if(reduced){
+  DEMOS.forEach(function(d){d.vis=true;draw(d,1200)});
+}else{
+  requestAnimationFrame(loop);
+}
+})();
+</script>

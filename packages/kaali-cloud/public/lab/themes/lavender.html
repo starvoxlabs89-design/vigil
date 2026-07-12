@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starvox — AI Company OS</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f3ff;
+      color: #1e1a3a;
+      line-height: 1.6;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%238b7acc' fill-opacity='0.03' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'/%3E%3C/svg%3E");
+    }
+    a { color: #8b7acc; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: #6b5cb0; }
+    img { max-width: 100%; display: block; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    section { padding: 80px 0; }
+    h2 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .section-sub { font-size: 1.1rem; color: #5a4f8a; max-width: 600px; margin: 0 auto 48px; text-align: center; }
+    .text-center { text-align: center; }
+
+    /* ── Glass Card ── */
+    .glass {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(196,181,253,0.3);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(139,122,204,0.08), 0 2px 8px rgba(139,122,204,0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .glass:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(139,122,204,0.14), 0 4px 12px rgba(139,122,204,0.06);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px; border-radius: 40px; font-weight: 600; font-size: 1rem;
+      border: none; cursor: pointer; transition: all 0.25s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b7acc, #a78bfa);
+      color: #fff; box-shadow: 0 4px 16px rgba(139,122,204,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 28px rgba(139,122,204,0.4); transform: translateY(-2px); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.8);
+      color: #8b7acc; border: 1.5px solid #c4b5fd;
+    }
+    .btn-secondary:hover { background: #fff; border-color: #8b7acc; transform: translateY(-2px); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(245,243,255,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(196,181,253,0.2);
+      padding: 16px 0;
+    }
+    nav .container { display: flex; align-items: center; justify-content: space-between; }
+    .logo {
+      font-size: 1.5rem; font-weight: 800; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #8b7acc, #6b5cb0);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { font-size: 0.95rem; font-weight: 500; color: #3d3566; }
+    .nav-links a:hover { color: #8b7acc; }
+    .nav-cta { padding: 10px 24px; font-size: 0.9rem; }
+    @media (max-width: 768px) {
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+
+    /* ── Hero ── */
+    #hero {
+      padding-top: 140px; padding-bottom: 80px;
+      background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
+      position: relative; overflow: hidden;
+    }
+    #hero::before {
+      content: ''; position: absolute; top: -40%; left: -20%; width: 80%; height: 80%;
+      background: radial-gradient(circle, rgba(196,181,253,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero-title {
+      font-size: 3.2rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #1e1a3a 0%, #8b7acc 50%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub { font-size: 1.15rem; color: #5a4f8a; margin: 20px 0 36px; max-width: 480px; }
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .stat-card {
+      padding: 20px; text-align: center;
+    }
+    .stat-card .num { font-size: 2rem; font-weight: 800; color: #8b7acc; }
+    .stat-card .label { font-size: 0.85rem; color: #5a4f8a; margin-top: 4px; }
+    @media (max-width: 768px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero-title { font-size: 2.4rem; }
+    }
+
+    /* ── Agents ── */
+    .agents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .agent-card {
+      padding: 28px; border-radius: 20px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(196,181,253,0.25);
+      transition: all 0.25s ease;
+    }
+    .agent-card:hover {
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 12px 40px rgba(139,122,204,0.12);
+      transform: translateY(-6px);
+    }
+    .agent-icon {
+      width: 48px; height: 48px; border-radius: 14px;
+      background: linear-gradient(135deg, #c4b5fd, #8b7acc);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 16px;
+    }
+    .agent-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .agent-card p { font-size: 0.9rem; color: #5a4f8a; margin-bottom: 16px; }
+    .agent-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .agent-tags span {
+      padding: 4px 12px; border-radius: 40px; font-size: 0.75rem; font-weight: 500;
+      background: rgba(196,181,253,0.2); color: #6b5cb0;
+    }
+    @media (max-width: 768px) { .agents-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .agents-grid { grid-template-columns: 1fr; } }
+
+    /* ── Pipeline ── */
+    .pipeline-flow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+    .pipe-step {
+      padding: 20px 28px; border-radius: 40px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(196,181,253,0.25);
+      font-weight: 600; font-size: 0.95rem; color: #3d3566;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pipe-step .step-num {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #c4b5fd, #8b7acc);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700;
+    }
+    .pipe-arrow { font-size: 1.4rem; color: #c4b5fd; }
+    @media (max-width: 768px) { .pipeline-flow { flex-direction: column; } .pipe-arrow { transform: rotate(90deg); } }
+
+    /* ── Testimonials ── */
+    .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .test-card {
+      padding: 28px; border-radius: 20px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(196,181,253,0.2);
+    }
+    .test-card .quote { font-size: 0.95rem; color: #3d3566; font-style: italic; margin-bottom: 16px; }
+    .test-card .author { font-weight: 700; color: #1e1a3a; }
+    .test-card .role { font-size: 0.8rem; color: #8b7acc; }
+    @media (max-width: 768px) { .test-grid { grid-template-columns: 1fr; } }
+
+    /* ── Pricing ── */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .pricing-card {
+      padding: 36px 28px; border-radius: 24px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(196,181,253,0.2);
+      text-align: center; transition: all 0.25s ease;
+    }
+    .pricing-card.featured {
+      background: rgba(255,255,255,0.9);
+      border: 2px solid #8b7acc;
+      box-shadow: 0 12px 48px rgba(139,122,204,0.15);
+      transform: scale(1.03);
+    }
+    .pricing-card h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+    .pricing-card .price { font-size: 2.8rem; font-weight: 800; color: #8b7acc; margin: 16px 0; }
+    .pricing-card .price span { font-size: 1rem; font-weight: 400; color: #5a4f8a; }
+    .pricing-card ul { list-style: none; margin: 24px 0; text-align: left; }
+    .pricing-card ul li { padding: 8px 0; font-size: 0.9rem; color: #3d3566; display: flex; align-items: center; gap: 8px; }
+    .pricing-card ul li::before { content: '\2713'; color: #8b7acc; font-weight: 700; }
+    @media (max-width: 768px) { .pricing-grid { grid-template-columns: 1fr; } .pricing-card.featured { transform: none; } }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 720px; margin: 0 auto; }
+    .faq-item {
+      border-bottom: 1px solid rgba(196,181,253,0.2);
+      padding: 20px 0;
+    }
+    .faq-q {
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 600; font-size: 1.05rem; cursor: pointer;
+      color: #1e1a3a; user-select: none;
+    }
+    .faq-q .toggle { font-size: 1.4rem; color: #8b7acc; transition: transform 0.2s; }
+    .faq-item.open .faq-q .toggle { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease;
+      color: #5a4f8a; font-size: 0.95rem;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding-top: 12px; }
+
+    /* ── CTA Section ── */
+    #cta {
+      background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 50%, #e0d6ff 100%);
+      text-align: center;
+    }
+    #cta h2 { font-size: 2.6rem; }
+    #cta p { color: #5a4f8a; max-width: 500px; margin: 16px auto 32px; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid rgba(196,181,253,0.2);
+      padding: 40px 0; color: #5a4f8a; font-size: 0.9rem;
+    }
+    footer .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    footer .links { display: flex; gap: 24px; }
+    footer .links a { color: #5a4f8a; }
+    footer .links a:hover { color: #8b7acc; }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Nav ─── -->
+  <nav>
+    <div class="container">
+      <div class="logo">Starvox</div>
+      <div class="nav-links">
+        <a href="#agents">Agents</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#cta" class="btn btn-primary nav-cta">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ─── -->
+  <section id="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1 class="hero-title">The AI Operating System for Your Company</h1>
+        <p class="hero-sub">Starvox unifies your agents, data, and workflows into one intelligent platform. Ship faster, decide smarter.</p>
+        <div class="hero-btns">
+          <a href="#cta" class="btn btn-primary">Start Free Trial</a>
+          <a href="#agents" class="btn btn-secondary">See Agents</a>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card glass"><div class="num">10K+</div><div class="label">Active Teams</div></div>
+        <div class="stat-card glass"><div class="num">99.9%</div><div class="label">Uptime</div></div>
+        <div class="stat-card glass"><div class="num">50M+</div><div class="label">Tasks Automated</div></div>
+        <div class="stat-card glass"><div class="num">4.9★</div><div class="label">Avg Rating</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Agents ─── -->
+  <section id="agents">
+    <div class="container text-center">
+      <h2>Meet Your AI Agents</h2>
+      <p class="section-sub">Specialized agents that collaborate to run your operations end-to-end.</p>
+      <div class="agents-grid">
+        <div class="agent-card">
+          <div class="agent-icon">📊</div>
+          <h3>Data Analyst</h3>
+          <p>Query, visualize, and report on any dataset in seconds.</p>
+          <div class="agent-tags"><span>SQL</span><span>Charts</span><span>PDF</span></div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">💬</div>
+          <h3>Support Agent</h3>
+          <p>Resolve tickets, route escalations, and maintain knowledge base.</p>
+          <div class="agent-tags"><span>Slack</span><span>Email</span><span>Zendesk</span></div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">📝</div>
+          <h3>Content Writer</h3>
+          <p>Draft blog posts, social copy, and internal docs in your brand voice.</p>
+          <div class="agent-tags"><span>SEO</span><span>Markdown</span><span>API</span></div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">🔍</div>
+          <h3>Research Agent</h3>
+          <p>Scrape, summarize, and synthesize competitive intelligence.</p>
+          <div class="agent-tags"><span>Web</span><span>PDF</span><span>Reports</span></div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">⚙️</div>
+          <h3>DevOps Agent</h3>
+          <p>Monitor infra, deploy code, and alert on anomalies.</p>
+          <div class="agent-tags"><span>Docker</span><span>K8s</span><span>PagerDuty</span></div>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">🤝</div>
+          <h3>Sales Agent</h3>
+          <p>Qualify leads, schedule demos, and send follow-ups.</p>
+          <div class="agent-tags"><span>CRM</span><span>Email</span><span>Calendar</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Pipeline ─── -->
+  <section id="pipeline" style="background: #ede9fe;">
+    <div class="container text-center">
+      <h2>How It Works</h2>
+      <p class="section-sub">From idea to execution in four seamless steps.</p>
+      <div class="pipeline-flow">
+        <div class="pipe-step"><span class="step-num">1</span> Define Goal</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="step-num">2</span> Assign Agents</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="step-num">3</span> Execute &amp; Monitor</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step"><span class="step-num">4</span> Review &amp; Iterate</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Testimonials ─── -->
+  <section id="testimonials">
+    <div class="container text-center">
+      <h2>Trusted by Teams</h2>
+      <p class="section-sub">What our users say about Starvox.</p>
+      <div class="test-grid">
+        <div class="test-card">
+          <div class="quote">"Starvox cut our reporting time by 80%. The agents just work — no more context switching."</div>
+          <div class="author">Priya Sharma</div>
+          <div class="role">CTO, Lumos Labs</div>
+        </div>
+        <div class="test-card">
+          <div class="quote">"We built a full customer support pipeline in one afternoon. The lavender UI is gorgeous too."</div>
+          <div class="author">Rahul Mehta</div>
+          <div class="role">Head of Ops, Zing</div>
+        </div>
+        <div class="test-card">
+          <div class="quote">"Finally, an AI platform that feels like a product, not a science experiment."</div>
+          <div class="author">Ananya Patel</div>
+          <div class="role">VP Engineering, Nimbus</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Pricing ─── -->
+  <section id="pricing" style="background: #ede9fe;">
+    <div class="container text-center">
+      <h2>Simple, Transparent Pricing</h2>
+      <p class="section-sub">Start free, scale as you grow. No hidden fees.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Starter</h3>
+          <div class="price">$0 <span>/mo</span></div>
+          <ul>
+            <li>Up to 3 agents</li>
+            <li>1,000 tasks/mo</li>
+            <li>Community support</li>
+            <li>Basic analytics</li>
+          </ul>
+          <a href="#cta" class="btn btn-secondary">Get Started</a>
+        </div>
+        <div class="pricing-card featured">
+          <h3>Pro</h3>
+          <div class="price">$49 <span>/mo</span></div>
+          <ul>
+            <li>Unlimited agents</li>
+            <li>50,000 tasks/mo</li>
+            <li>Priority support</li>
+            <li>Advanced analytics</li>
+            <li>Custom integrations</li>
+          </ul>
+          <a href="#cta" class="btn btn-primary">Start Free Trial</a>
+        </div>
+        <div class="pricing-card">
+          <h3>Enterprise</h3>
+          <div class="price">$199 <span>/mo</span></div>
+          <ul>
+            <li>Everything in Pro</li>
+            <li>Unlimited tasks</li>
+            <li>Dedicated account manager</li>
+            <li>SSO &amp; audit logs</li>
+            <li>On-premise option</li>
+          </ul>
+          <a href="#cta" class="btn btn-secondary">Contact Sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ ─── -->
+  <section id="faq">
+    <div class="container text-center">
+      <h2>Frequently Asked Questions</h2>
+      <p class="section-sub">Everything you need to know about Starvox.</p>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q">What is Starvox? <span class="toggle">+</span></div>
+          <div class="faq-a">Starvox is an AI-powered operating system for companies. It connects your agents, data, and workflows into one unified platform.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">How do I get started? <span class="toggle">+</span></div>
+          <div class="faq-a">Sign up for free, choose your agents, and define your first workflow. No credit card required.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Can I integrate with my existing tools? <span class="toggle">+</span></div>
+          <div class="faq-a">Yes! Starvox supports Slack, Gmail, Zendesk, GitHub, Jira, and hundreds more via our API and Zapier integration.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Is my data secure? <span class="toggle">+</span></div>
+          <div class="faq-a">Absolutely. We use end-to-end encryption, SOC 2 compliance, and offer on-premise deployment for Enterprise plans.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA ─── -->
+  <section id="cta">
+    <div class="container">
+      <h2>Ready to Transform Your Company?</h2>
+      <p>Join thousands of teams already running on Starvox. Start your free trial today.</p>
+      <a href="#" class="btn btn-primary" style="font-size: 1.1rem; padding: 16px 40px;">Start Free Trial →</a>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─── -->
+  <footer>
+    <div class="container">
+      <div>© 2025 Starvox. All rights reserved.</div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Docs</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ toggle
+    document.querySelectorAll('.faq-q').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

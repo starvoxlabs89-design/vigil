@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starvox — Void</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#000;--txt:#fff;--dim:#555;--accent:#fff;--border:#1a1a1a}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-size:15px;font-weight:700;letter-spacing:0.04em}
+.nav-logo span{color:var(--dim);font-weight:400;margin-left:8px;font-size:13px}
+.nav-links{display:flex;gap:32px}
+.nav-links a{color:var(--dim);text-decoration:none;font-size:13px;letter-spacing:0.02em;transition:color .2s}
+.nav-links a:hover{color:var(--txt)}
+.nav-cta{background:#fff;color:#000;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;transition:opacity .15s}
+.nav-cta:hover{opacity:.85}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative}
+.hero-eyebrow{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin-bottom:32px;display:flex;align-items:center;gap:12px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:"";flex:1;max-width:60px;height:1px;background:var(--border)}
+.hero h1{font-size:clamp(52px,8vw,120px);font-weight:700;letter-spacing:-0.04em;line-height:.95;margin-bottom:28px}
+.hero h1 em{font-style:normal;color:var(--dim)}
+.hero-sub{font-size:16px;color:var(--dim);line-height:1.7;max-width:480px;margin:0 auto 48px;letter-spacing:0.01em}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:#fff;color:#000;border:none;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:0.02em;transition:opacity .15s}
+.btn-primary:hover{opacity:.85}
+.btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border);padding:14px 32px;border-radius:8px;font-size:14px;cursor:pointer;letter-spacing:0.02em;transition:all .15s}
+.btn-ghost:hover{color:var(--txt);border-color:#444}
+.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--dim),transparent);animation:scroll-drop 2s ease-in-out infinite}
+@keyframes scroll-drop{0%{opacity:0;transform:translateY(-12px)}50%{opacity:1}100%{opacity:0;transform:translateY(12px)}}
+/* STATS */
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr)}
+.stat{padding:40px 32px;border-right:1px solid var(--border);text-align:center}
+.stat:last-child{border-right:0}
+.stat-n{font-size:42px;font-weight:700;letter-spacing:-0.03em;margin-bottom:6px}
+.stat-l{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim)}
+/* AGENTS */
+.section{padding:100px 48px;max-width:1100px;margin:0 auto}
+.section-label{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--dim);margin-bottom:60px;display:flex;align-items:center;gap:16px}
+.section-label::before{content:"";width:24px;height:1px;background:var(--dim)}
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.agent-cell{background:var(--bg);padding:32px 28px;transition:background .2s}
+.agent-cell:hover{background:#0a0a0a}
+.agent-num{font-size:10px;font-family:monospace;color:var(--dim);margin-bottom:20px;letter-spacing:0.08em}
+.agent-name{font-size:17px;font-weight:600;margin-bottom:10px;letter-spacing:-0.01em}
+.agent-desc{font-size:12.5px;color:var(--dim);line-height:1.65}
+/* PIPELINE */
+.pipeline{padding:100px 48px;max-width:1100px;margin:0 auto}
+.pipe-steps{display:flex;align-items:center;gap:0;margin-top:60px;overflow-x:auto}
+.pipe-step{flex:1;min-width:120px;text-align:center;position:relative}
+.pipe-step:not(:last-child)::after{content:"→";position:absolute;right:-16px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:14px}
+.pipe-dot{width:48px;height:48px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:11px;font-family:monospace;color:var(--dim);transition:all .2s}
+.pipe-step:hover .pipe-dot{border-color:#555;color:#fff}
+.pipe-label{font-size:12px;font-weight:600;letter-spacing:0.04em;margin-bottom:4px}
+.pipe-sub{font-size:10px;color:var(--dim);letter-spacing:0.02em}
+/* CTA */
+.cta-section{padding:120px 48px;text-align:center;border-top:1px solid var(--border)}
+.cta-section h2{font-size:clamp(36px,5vw,72px);font-weight:700;letter-spacing:-0.03em;margin-bottom:20px;line-height:1}
+.cta-section p{color:var(--dim);font-size:15px;margin-bottom:40px}
+/* FOOTER */
+footer{padding:32px 48px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.footer-logo{font-size:13px;font-weight:700;letter-spacing:0.04em}
+.footer-copy{font-size:11px;color:var(--dim)}
+@media(max-width:768px){.agents-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.nav-links{display:none}.section,.pipeline{padding:60px 24px}.pipe-steps{flex-direction:column;gap:24px}.pipe-step:not(:last-child)::after{content:"↓";right:auto;top:auto;bottom:-20px;left:50%;transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">STARVOX <span>Master AI</span></div>
+  <div class="nav-links">
+    <a href="#">Agents</a><a href="#">Products</a><a href="#">Pricing</a><a href="#">Docs</a>
+  </div>
+  <button class="nav-cta">Start free</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">The AI company operating system</div>
+  <h1>One brain.<br><em>Every task.</em><br>Zero&nbsp;humans.</h1>
+  <p class="hero-sub">Starvox runs your entire product company — from intent to deployment — with 16 specialist agents that never sleep, never context-switch, never forget.</p>
+  <div class="hero-actions">
+    <button class="btn-primary">Get started free →</button>
+    <button class="btn-ghost">Watch demo</button>
+  </div>
+  <div class="hero-scroll"><div class="scroll-line"></div></div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n">16</div><div class="stat-l">Agents</div></div>
+  <div class="stat"><div class="stat-n">31</div><div class="stat-l">Tools</div></div>
+  <div class="stat"><div class="stat-n">25</div><div class="stat-l">Models</div></div>
+  <div class="stat"><div class="stat-n">$0.03</div><div class="stat-l">Per build</div></div>
+</div>
+
+<div class="section">
+  <div class="section-label">The roster</div>
+  <div class="agents-grid">
+    <div class="agent-cell"><div class="agent-num">01 / PM</div><div class="agent-name">Project Manager</div><div class="agent-desc">Turns a sentence into a spec, breaks it into subtasks, assigns to specialists.</div></div>
+    <div class="agent-cell"><div class="agent-num">02 / FE</div><div class="agent-name">Frontend Dev</div><div class="agent-desc">Builds UI in React, Vue, or vanilla. Knows your design system.</div></div>
+    <div class="agent-cell"><div class="agent-num">03 / BE</div><div class="agent-name">Backend Dev</div><div class="agent-desc">APIs, logic, DB schemas. Runs code in a sandbox, verifies output.</div></div>
+    <div class="agent-cell"><div class="agent-num">04 / QA</div><div class="agent-name">QA Agent</div><div class="agent-desc">Writes tests, runs browser flows, catches regressions before you do.</div></div>
+    <div class="agent-cell"><div class="agent-num">05 / SEC</div><div class="agent-name">Security Agent</div><div class="agent-desc">Audits every release. OWASP top 10, leaked keys, insecure deps.</div></div>
+    <div class="agent-cell"><div class="agent-num">06 / OPS</div><div class="agent-name">DevOps Agent</div><div class="agent-desc">SSH deploys. Rollback on failure. Zero-touch, every time.</div></div>
+  </div>
+</div>
+
+<div class="pipeline">
+  <div class="section-label">The pipeline</div>
+  <div class="pipe-steps">
+    <div class="pipe-step"><div class="pipe-dot">01</div><div class="pipe-label">Intent</div><div class="pipe-sub">Natural language</div></div>
+    <div class="pipe-step"><div class="pipe-dot">02</div><div class="pipe-label">Spec</div><div class="pipe-sub">PM Agent</div></div>
+    <div class="pipe-step"><div class="pipe-dot">03</div><div class="pipe-label">Build</div><div class="pipe-sub">Dev Agents ×N</div></div>
+    <div class="pipe-step"><div class="pipe-dot">04</div><div class="pipe-label">Test</div><div class="pipe-sub">QA + Security</div></div>
+    <div class="pipe-step"><div class="pipe-dot">05</div><div class="pipe-label">Deploy</div><div class="pipe-sub">DevOps Agent</div></div>
+    <div class="pipe-step"><div class="pipe-dot">06</div><div class="pipe-label">Monitor</div><div class="pipe-sub">24/7 watch</div></div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <h2>Ship faster.<br>Think bigger.</h2>
+  <p>Your AI company OS is waiting.</p>
+  <button class="btn-primary">Open Starvox →</button>
+</div>
+
+<footer>
+  <div class="footer-logo">STARVOX</div>
+  <div class="footer-copy">© 2025 Vaanilabs. All rights reserved.</div>
+</footer>
+</body>
+</html>

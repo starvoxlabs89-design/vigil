@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starvox — AI Company OS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fff8f5;
+      color: #2e1a16;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    /* Nav */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(232,138,122,0.15);
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #2e1a16;
+    }
+    .logo span { color: #e88a7a; }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #5a3e3a;
+    }
+    .nav-links a { text-decoration: none; color: inherit; transition: color 0.2s; }
+    .nav-links a:hover { color: #e88a7a; }
+    .nav-cta {
+      background: #e88a7a;
+      color: #fff !important;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: #d47363; transform: translateY(-1px); }
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      max-width: 800px;
+      margin: 0 auto 20px;
+      color: #2e1a16;
+    }
+    .hero h1 em { color: #e88a7a; font-style: italic; }
+    .hero p {
+      font-size: 1.2rem;
+      color: #6a4e4a;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 50px;
+    }
+    .btn-primary {
+      background: #e88a7a;
+      color: #fff;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(232,138,122,0.3);
+    }
+    .btn-primary:hover { background: #d47363; transform: translateY(-2px); }
+    .btn-secondary {
+      background: transparent;
+      color: #2e1a16;
+      border: 1.5px solid #f5c4b0;
+      padding: 14px 36px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-secondary:hover { background: #fff0ea; border-color: #e88a7a; }
+    /* Stats */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #e88a7a;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: #6a4e4a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    /* Section titles */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 12px;
+      color: #2e1a16;
+    }
+    .section-sub {
+      text-align: center;
+      color: #6a4e4a;
+      max-width: 500px;
+      margin: 0 auto 48px;
+      font-size: 1rem;
+    }
+    /* Agent cards */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+    .agent-card {
+      background: #fff0ea;
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(232,138,122,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(245,196,176,0.3);
+    }
+    .agent-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(232,138,122,0.15); }
+    .agent-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+    .agent-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #2e1a16;
+    }
+    .agent-card p {
+      font-size: 0.9rem;
+      color: #5a3e3a;
+      line-height: 1.5;
+    }
+    /* Pipeline */
+    .pipeline {
+      background: #fff0ea;
+      border-radius: 24px;
+      padding: 48px 32px;
+      margin-bottom: 80px;
+      box-shadow: 0 2px 12px rgba(232,138,122,0.08);
+    }
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .pipe-step {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px 20px;
+      min-width: 120px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(232,138,122,0.1);
+      border: 1px solid #f5c4b0;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #2e1a16;
+    }
+    .pipe-arrow {
+      font-size: 1.5rem;
+      color: #e88a7a;
+      font-weight: 300;
+    }
+    /* Social proof */
+    .social-proof {
+      margin-bottom: 80px;
+      text-align: center;
+    }
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .testimonial {
+      background: #fff0ea;
+      border-radius: 20px;
+      padding: 28px;
+      text-align: left;
+      border: 1px solid rgba(245,196,176,0.3);
+    }
+    .testimonial p {
+      font-style: italic;
+      color: #5a3e3a;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+    .testimonial-author {
+      font-weight: 600;
+      color: #2e1a16;
+      font-size: 0.9rem;
+    }
+    .testimonial-role {
+      font-size: 0.8rem;
+      color: #6a4e4a;
+    }
+    /* Pricing */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+    .pricing-card {
+      background: #fff0ea;
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      border: 1px solid rgba(245,196,176,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .pricing-card.featured {
+      background: #fff;
+      border: 2px solid #e88a7a;
+      box-shadow: 0 4px 20px rgba(232,138,122,0.15);
+      transform: scale(1.02);
+    }
+    .pricing-card h3 { font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+    .pricing-card .price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #e88a7a;
+      margin: 16px 0;
+    }
+    .pricing-card .price span { font-size: 1rem; font-weight: 400; color: #6a4e4a; }
+    .pricing-card ul {
+      list-style: none;
+      text-align: left;
+      margin: 20px 0 28px;
+    }
+    .pricing-card ul li {
+      padding: 6px 0;
+      font-size: 0.9rem;
+      color: #5a3e3a;
+    }
+    .pricing-card ul li::before { content: "✓ "; color: #e88a7a; font-weight: 700; }
+    /* FAQ */
+    .faq-section { margin-bottom: 80px; }
+    .faq-item {
+      background: #fff0ea;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(245,196,176,0.3);
+      overflow: hidden;
+    }
+    .faq-question {
+      padding: 18px 24px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #2e1a16;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: rgba(232,138,122,0.06); }
+    .faq-question .icon { font-size: 1.2rem; transition: transform 0.2s; }
+    .faq-item.open .faq-question .icon { transform: rotate(45deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 24px;
+      color: #5a3e3a;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 200px;
+      padding: 0 24px 18px;
+    }
+    /* Newsletter */
+    .newsletter {
+      background: #fff0ea;
+      border-radius: 24px;
+      padding: 48px 32px;
+      text-align: center;
+      margin-bottom: 80px;
+      border: 1px solid rgba(245,196,176,0.3);
+    }
+    .newsletter h2 { font-size: 1.8rem; font-weight: 500; margin-bottom: 12px; }
+    .newsletter p { color: #6a4e4a; margin-bottom: 24px; }
+    .newsletter-form {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .newsletter-form input {
+      padding: 14px 20px;
+      border-radius: 40px;
+      border: 1.5px solid #f5c4b0;
+      background: #fff;
+      font-size: 1rem;
+      min-width: 280px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .newsletter-form input:focus { border-color: #e88a7a; }
+    .newsletter-form button {
+      background: #e88a7a;
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .newsletter-form button:hover { background: #d47363; }
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(232,138,122,0.15);
+      padding: 40px 0 24px;
+      text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      list-style: none;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      text-decoration: none;
+      color: #5a3e3a;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: #e88a7a; }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: #8a6e6a;
+    }
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .pipeline-flow { flex-direction: column; }
+      .pipe-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Nav -->
+    <nav>
+      <div class="logo">star<span>vox</span></div>
+      <ul class="nav-links">
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#pipeline">Pipeline</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#newsletter" class="nav-cta">Get Early Access</a></li>
+      </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <h1>Your entire company, <em>orchestrated by AI</em></h1>
+      <p>Starvox is the operating system for AI-native teams. Deploy agents, automate workflows, and ship faster — all from one elegant platform.</p>
+      <div class="hero-buttons">
+        <button class="btn-primary">Start Free Trial</button>
+        <button class="btn-secondary">Watch Demo</button>
+      </div>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number" id="stat1">0</div>
+          <div class="stat-label">Active Agents</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="stat2">0</div>
+          <div class="stat-label">Tasks Automated</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="stat3">0</div>
+          <div class="stat-label">Happy Teams</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Agents -->
+    <section id="agents">
+      <h2 class="section-title">Meet your AI team</h2>
+      <p class="section-sub">Six specialized agents that work together to run your operations.</p>
+      <div class="agents-grid">
+        <div class="agent-card">
+          <div class="agent-icon">📋</div>
+          <h3>Project Manager</h3>
+          <p>Plans sprints, assigns tasks, and tracks progress across your entire org.</p>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">💻</div>
+          <h3>Code Reviewer</h3>
+          <p>Reviews pull requests, suggests improvements, and catches bugs before merge.</p>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">📊</div>
+          <h3>Data Analyst</h3>
+          <p>Queries databases, builds dashboards, and surfaces insights in real time.</p>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">✉️</div>
+          <h3>Email Assistant</h3>
+          <p>Drafts, triages, and responds to customer and internal emails.</p>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">🎨</div>
+          <h3>Design Agent</h3>
+          <p>Generates mockups, refines UI, and maintains your design system.</p>
+        </div>
+        <div class="agent-card">
+          <div class="agent-icon">🔍</div>
+          <h3>Research Agent</h3>
+          <p>Scrapes the web, summarizes findings, and keeps you ahead of competitors.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pipeline -->
+    <section id="pipeline" class="pipeline">
+      <h2 class="section-title">From idea to production</h2>
+      <p class="section-sub">Your work flows seamlessly through our intelligent pipeline.</p>
+      <div class="pipeline-flow">
+        <div class="pipe-step">🧠 Ideate</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">📝 Plan</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">⚡ Build</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">✅ Review</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">🚀 Deploy</div>
+        <span class="pipe-arrow">→</span>
+        <div class="pipe-step">📈 Monitor</div>
+      </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="social-proof">
+      <h2 class="section-title">Trusted by AI-native teams</h2>
+      <p class="section-sub">Hear from the teams that ship with Starvox.</p>
+      <div class="testimonial-grid">
+        <div class="testimonial">
+          <p>"Starvox cut our release cycle from two weeks to two days. The agents feel like senior engineers."</p>
+          <div class="testimonial-author">— Priya Sharma</div>
+          <div class="testimonial-role">CTO, Luminara</div>
+        </div>
+        <div class="testimonial">
+          <p>"We automated 80% of our ops within the first month. The pipeline is pure magic."</p>
+          <div class="testimonial-author">— Rohan Mehta</div>
+          <div class="testimonial-role">VP Engineering, NexaCore</div>
+        </div>
+        <div class="testimonial">
+          <p>"Finally, an AI platform that feels like a product, not a science experiment."</p>
+          <div class="testimonial-author">— Ananya Patel</div>
+          <div class="testimonial-role">Head of Product, Stellaris</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing">
+      <h2 class="section-title">Simple, transparent pricing</h2>
+      <p class="section-sub">Start free, scale as you grow. No hidden fees.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Starter</h3>
+          <div class="price">₹0 <span>/mo</span></div>
+          <ul>
+            <li>Up to 3 agents</li>
+            <li>1 pipeline</li>
+            <li>Community support</li>
+            <li>100 tasks/month</li>
+          </ul>
+          <button class="btn-secondary">Get Started</button>
+        </div>
+        <div class="pricing-card featured">
+          <h3>Pro</h3>
+          <div class="price">₹2,499 <span>/mo</span></div>
+          <ul>
+            <li>Unlimited agents</li>
+            <li>Unlimited pipelines</li>
+            <li>Priority support</li>
+            <li>Unlimited tasks</li>
+            <li>Custom integrations</li>
+          </ul>
+          <button class="btn-primary">Start Free Trial</button>
+        </div>
+        <div class="pricing-card">
+          <h3>Enterprise</h3>
+          <div class="price">Custom</div>
+          <ul>
+            <li>Dedicated instance</li>
+            <li>SSO & audit logs</li>
+            <li>24/7 support</li>
+            <li>Custom agent training</li>
+            <li>SLA guarantee</li>
+          </ul>
+          <button class="btn-secondary">Contact Sales</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="faq-section">
+      <h2 class="section-title">Frequently asked questions</h2>
+      <p class="section-sub">Everything you need to know about Starvox.</p>
+      <div class="faq-item">
+        <div class="faq-question">What is Starvox? <span class="icon">+</span></div>
+        <div class="faq-answer">Starvox is an AI operating system for companies. It deploys specialized agents that automate workflows, manage tasks, and help your team ship faster.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How do I get started? <span class="icon">+</span></div>
+        <div class="faq-answer">Sign up for a free Starter plan — no credit card required. You'll get three agents and a pipeline to experiment with immediately.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can I customize agents? <span class="icon">+</span></div>
+        <div class="faq-answer">Yes. Pro and Enterprise plans allow you to train agents on your own data, define custom workflows, and integrate with any API.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Is my data secure? <span class="icon">+</span></div>
+        <div class="faq-answer">Absolutely. All data is encrypted at rest and in transit. Enterprise customers get a dedicated instance with SSO and audit logs.</div>
+      </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section id="newsletter" class="newsletter">
+      <h2>Stay in the loop</h2>
+      <p>Get product updates, tips, and early access invites straight to your inbox.</p>
+      <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thanks for subscribing!');">
+        <input type="email" placeholder="you@company.com" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <ul class="footer-links">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Terms</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <div class="footer-copy">© 2025 Starvox. All rights reserved. Made with ♥ for AI-native teams.</div>
+    </div>
+  </footer>
+
+  <script>
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+
+    // Animated counters
+    function animateCounter(el, target, duration) {
+      let start = 0;
+      const step = Math.ceil(target / (duration / 16));
+      const timer = setInterval(() => {
+        start += step;
+        if (start >= target) { start = target; clearInterval(timer); }
+        el.textContent = start.toLocaleString();
+      }, 16);
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateCounter(document.getElementById('stat1'), 1248, 1500);
+          animateCounter(document.getElementById('stat2'), 28400, 1800);
+          animateCounter(document.getElementById('stat3'), 892, 1200);
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.5 });
+    observer.observe(document.querySelector('.stats'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaali Design Lab — pick a reference</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root{
+    --bg:#050710;--panel:#0e1220;--panel2:#141826;--line:#1e2436;
+    --text:#e6edf3;--dim:#8b97a6;--accent:#5eead4;--accent2:#38bdf8;--warm:#fb923c;
+    --serif:'Playfair Display',ui-serif,Georgia,serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:60px 24px 100px}
+  header{margin-bottom:48px}
+  .kicker{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:100px;
+    background:rgba(94,234,212,.08);border:1px solid rgba(94,234,212,.25);
+    color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .kicker::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  h1{font:400 clamp(38px,5vw,64px)/1.05 var(--serif);letter-spacing:-.02em;margin:20px 0 12px}
+  h1 em{font-style:italic;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--dim);font-size:16px;line-height:1.6;max-width:640px;margin:0}
+  h2{font:600 22px/1.2 inherit;letter-spacing:-.01em;margin:56px 0 6px}
+  .sect-sub{color:var(--dim);font-size:14px;margin:0 0 22px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:14px;padding:18px 18px 16px;transition:.15s;display:flex;flex-direction:column;gap:8px;position:relative}
+  .card:hover{border-color:var(--accent2);transform:translateY(-2px)}
+  .card .tag{font:600 10.5px/1 var(--mono);color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+  .card .name{font:600 16px/1.2 var(--serif);letter-spacing:-.01em}
+  .card .desc{color:var(--dim);font-size:13px;line-height:1.55;flex:1}
+  .card .cta{color:var(--accent2);font-size:12.5px;font-weight:600;margin-top:6px;display:flex;align-items:center;gap:5px}
+  .card.big{grid-column:span 2}
+  @media (max-width:640px){ .card.big{grid-column:span 1} }
+  .swatch{width:100%;height:80px;border-radius:8px;margin-top:2px}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);color:var(--dim);font-size:13px;line-height:1.55}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="kicker">Internal · not indexed</span>
+    <h1>Kaali <em>Design Lab</em></h1>
+    <p class="lede">Every theme, cosmic scene, and prototype we've built across Starvox — collected here. Browse and tell me: "use #4 as the base" or "port cosmos as the hero" and I'll build it into kaali.io.</p>
+  </header>
+
+  <h2>Cosmic WebGL scenes</h2>
+  <p class="sect-sub">Full-page three.js scenes. The most likely candidates for the Kaali hero.</p>
+  <div class="grid">
+    <a class="card big" href="cosmos/" target="_blank">
+      <div class="swatch" style="background:radial-gradient(circle at 30% 30%, #7c3aed, transparent 50%), radial-gradient(circle at 70% 60%, #e9c46a, transparent 60%), #05060f"></div>
+      <span class="tag">WebGL · Fluid physics</span>
+      <div class="name">Nada Brahma — the fluid black-hole sound</div>
+      <div class="desc">Fluid-particle black hole with sound waves. Deep cosmic, gold accents, painterly feel. <strong>Best match for the mbaiarts reference.</strong></div>
+      <div class="cta">Open scene →</div>
+    </a>
+    <a class="card big" href="galaxy/" target="_blank">
+      <div class="swatch" style="background:radial-gradient(circle at 50% 50%, #38bdf8, transparent 40%), radial-gradient(circle at 20% 30%, #a78bfa, transparent 50%), radial-gradient(circle at 80% 70%, #e9c46a, transparent 40%), #050710"></div>
+      <span class="tag">WebGL · Nakshatra galaxy</span>
+      <div class="name">Aakash Ganga — 27 Vedic Nakshatras</div>
+      <div class="desc">27 Nakshatras on the ecliptic, graha-colored, live focus readout. Igloo.inc-style rotating galaxy.</div>
+      <div class="cta">Open galaxy →</div>
+    </a>
+  </div>
+
+  <h2>Themes</h2>
+  <p class="sect-sub">Complete design systems as single-file HTML. Pick a palette + typography direction for Kaali.</p>
+  <div class="grid">
+    <a class="card" href="themes/void.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#050710,#0e1220)"></div>
+      <span class="tag">Deep space · minimal</span>
+      <div class="name">Void</div>
+      <div class="desc">Near-black backdrop, restrained color, sparse cosmic accents. Current Kaali direction is closest to this.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/plasma.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#7c3aed,#ec4899,#f59e0b)"></div>
+      <span class="tag">Electric cosmic</span>
+      <div class="name">Plasma</div>
+      <div class="desc">Vivid gradients (violet→pink→gold), high-energy. Great for a mythological hero.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/aurora-full.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#0f172a,#10b981,#06b6d4)"></div>
+      <span class="tag">Full-page · nordic aurora</span>
+      <div class="name">Aurora (full)</div>
+      <div class="desc">Sweeping northern-lights gradients across the full page. Immersive.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/aurora.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#0f172a,#10b981)"></div>
+      <span class="tag">Aurora · accent</span>
+      <div class="name">Aurora</div>
+      <div class="desc">Aurora used as accent, calmer overall.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/carbon.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#111,#333)"></div>
+      <span class="tag">Dark tech</span>
+      <div class="name">Carbon</div>
+      <div class="desc">Industrial dark, monochrome. Reads as serious enterprise security.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/terminal.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#000,#00ff9d)"></div>
+      <span class="tag">Retro CLI</span>
+      <div class="name">Terminal</div>
+      <div class="desc">Green-on-black terminal aesthetic. Would work for docs / hacker vibe.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/lavender.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#c4b5fd,#8b5cf6)"></div>
+      <span class="tag">Soft violet</span>
+      <div class="name">Lavender</div>
+      <div class="desc">Soft violet + off-white. Warmer, less cosmic.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/mint.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#a7f3d0,#10b981)"></div>
+      <span class="tag">Fresh green</span>
+      <div class="name">Mint</div>
+      <div class="desc">Fresh mint + white. Probably wrong palette for Kaali.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/blush.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#fbcfe8,#f472b6)"></div>
+      <span class="tag">Warm pink</span>
+      <div class="name">Blush</div>
+      <div class="desc">Warm pink + cream. Probably wrong palette.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/brutalist-full.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#fff,#000)"></div>
+      <span class="tag">Full-page · brutalist</span>
+      <div class="name">Brutalist (full)</div>
+      <div class="desc">Harsh black & white brutalism. Wrong vibe for Kaali.</div>
+      <div class="cta">Preview →</div>
+    </a>
+    <a class="card" href="themes/brutalist.html" target="_blank">
+      <div class="swatch" style="background:linear-gradient(135deg,#fff,#111)"></div>
+      <span class="tag">Brutalist · accent</span>
+      <div class="name">Brutalist</div>
+      <div class="desc">Brutalist accent version.</div>
+      <div class="cta">Preview →</div>
+    </a>
+  </div>
+
+  <h2>Prototype pages</h2>
+  <p class="sect-sub">Existing Starvox prototypes — for layout / interaction reference.</p>
+  <div class="grid">
+    <a class="card" href="prototypes/proto-01-constellation.html" target="_blank">
+      <span class="tag">Prototype 01</span>
+      <div class="name">Constellation</div>
+      <div class="desc">Star-connected constellation UI.</div>
+      <div class="cta">Open →</div>
+    </a>
+    <a class="card" href="prototypes/proto-03-millisecond.html" target="_blank">
+      <span class="tag">Prototype 03</span>
+      <div class="name">Millisecond</div>
+      <div class="desc">Latency-focused hero design.</div>
+      <div class="cta">Open →</div>
+    </a>
+    <a class="card" href="prototypes/proto-06-vox-online.html" target="_blank">
+      <span class="tag">Prototype 06</span>
+      <div class="name">Vox Online</div>
+      <div class="desc">The JARVIS-style presence prototype.</div>
+      <div class="cta">Open →</div>
+    </a>
+    <a class="card" href="prototypes/proto-07-starvox-os.html" target="_blank">
+      <span class="tag">Prototype 07</span>
+      <div class="name">Starvox OS</div>
+      <div class="desc">OS-inspired layout.</div>
+      <div class="cta">Open →</div>
+    </a>
+    <a class="card" href="prototypes/starvox-live-constellation.html" target="_blank">
+      <span class="tag">Live constellation</span>
+      <div class="name">Live Constellation</div>
+      <div class="desc">Real-time animated constellation.</div>
+      <div class="cta">Open →</div>
+    </a>
+    <a class="card" href="prototypes/starvox-five-directions.html" target="_blank">
+      <span class="tag">Layout</span>
+      <div class="name">Five Directions</div>
+      <div class="desc">Five-direction navigation composition.</div>
+      <div class="cta">Open →</div>
+    </a>
+  </div>
+
+  <div class="footer">
+    <strong>How to use:</strong> click through, find one that captures what you want Kaali to feel like, then tell me
+    <em>"use cosmos as the hero"</em> or <em>"take plasma's palette + our current layout"</em> and I'll rebuild
+    kaali.io in that direction.
+    <br><br>
+    <a href="/" style="color:var(--accent2)">← Back to kaali.io</a>
+  </div>
+</div>
+</body>
+</html>

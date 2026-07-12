@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starvox — Brutalist</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0c0c;--panel:#111;--pink:#ff2d78;--cyan:#00f5ff;--yellow:#ffe600;--txt:#f0f0f0;--dim:#666;--border:#222}
+html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* NAV */
+nav{padding:0;border-bottom:2px solid var(--border);display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg)}
+.nav-brand{padding:18px 32px;border-right:2px solid var(--border);display:flex;align-items:center;gap:10px}
+.nav-brand-name{font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--txt)}
+.nav-brand-badge{background:var(--pink);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;letter-spacing:.06em;text-transform:uppercase}
+.nav-mid{padding:0 32px;display:flex;align-items:center;gap:0}
+.nav-link{padding:0 20px;height:100%;display:flex;align-items:center;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);text-decoration:none;border-right:1px solid var(--border);transition:color .12s,background .12s}
+.nav-link:hover{color:var(--txt);background:rgba(255,255,255,.03)}
+.nav-cta{padding:0 36px;background:var(--pink);color:#fff;font-size:11.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:opacity .15s}
+.nav-cta:hover{opacity:.85}
+/* HERO */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;padding-top:58px}
+.hero-left{padding:80px 60px;display:flex;flex-direction:column;justify-content:center;border-right:2px solid var(--border)}
+.hero-num{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-num::before{content:"";width:32px;height:2px;background:var(--pink)}
+.hero h1{font-size:clamp(52px,6.5vw,96px);font-weight:900;letter-spacing:-.04em;line-height:.9;margin-bottom:32px;text-transform:uppercase}
+.hero h1 .accent{color:var(--pink);-webkit-text-stroke:0 transparent}
+.hero h1 .outline{-webkit-text-stroke:2px var(--txt);-webkit-text-fill-color:transparent;color:transparent}
+.hero-desc{font-size:14px;color:var(--dim);line-height:1.75;max-width:420px;margin-bottom:48px}
+.hero-btns{display:flex;gap:0}
+.hbtn{padding:16px 32px;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
+.hbtn-pink{background:var(--pink);color:#fff}
+.hbtn-pink:hover{background:#e0205a}
+.hbtn-outline{background:transparent;border:2px solid var(--border);color:var(--dim)}
+.hbtn-outline:hover{border-color:var(--txt);color:var(--txt)}
+.hero-right{display:flex;flex-direction:column}
+.hero-stat-grid{display:grid;grid-template-columns:1fr 1fr;flex:1}
+.hero-stat{padding:40px 32px;border-bottom:2px solid var(--border);border-right:2px solid var(--border);display:flex;flex-direction:column;justify-content:flex-end}
+.hero-stat:nth-child(even){border-right:0}
+.hero-stat-n{font-size:56px;font-weight:900;letter-spacing:-.04em;line-height:1;margin-bottom:8px}
+.c-pink{color:var(--pink)}
+.c-cyan{color:var(--cyan)}
+.c-yellow{color:var(--yellow)}
+.c-white{color:#fff}
+.hero-stat-l{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.ticker{background:var(--pink);padding:10px 0;overflow:hidden;border-bottom:2px solid var(--border)}
+.ticker-inner{display:flex;gap:0;animation:tick 18s linear infinite;white-space:nowrap}
+.tick-item{padding:0 32px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;border-right:1px solid rgba(255,255,255,.3)}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* FEATURES */
+.features{display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid var(--border)}
+.feature-col{border-right:2px solid var(--border);padding:0}
+.feature-col:last-child{border-right:0}
+.feat-header{padding:20px 28px;border-bottom:2px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.feat-num{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--pink)}
+.feat-icon{font-size:20px}
+.feat-body{padding:28px}
+.feat-name{font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:12px}
+.feat-desc{font-size:12px;color:var(--dim);line-height:1.7}
+.feat-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.ftag{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border:1px solid var(--border);color:var(--dim)}
+/* PIPELINE */
+.pipeline{padding:80px 60px;border-top:2px solid var(--border)}
+.pipe-header{display:flex;align-items:baseline;gap:24px;margin-bottom:48px}
+.pipe-h{font-size:clamp(36px,5vw,72px);font-weight:900;text-transform:uppercase;letter-spacing:-.04em;line-height:1}
+.pipe-h .outline{-webkit-text-stroke:2px var(--dim);-webkit-text-fill-color:transparent}
+.pipe-steps{display:grid;grid-template-columns:repeat(6,1fr);gap:2px}
+.pstep{padding:24px 20px;background:var(--panel);border-top:3px solid transparent;transition:all .2s}
+.pstep:hover{background:#151515;border-top-color:var(--pink)}
+.pstep-n{font-size:9px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:20px}
+.pstep-lbl{font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:6px}
+.pstep-sub{font-size:10.5px;color:var(--dim)}
+/* CTA */
+.cta{padding:80px 60px;border-top:2px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:60px;align-items:center}
+.cta h2{font-size:clamp(40px,6vw,88px);font-weight:900;text-transform:uppercase;letter-spacing:-.04em;line-height:.9}
+.cta h2 .outline{-webkit-text-stroke:2px var(--txt);-webkit-text-fill-color:transparent}
+.cta h2 .pink{color:var(--pink)}
+.cta-right{display:flex;flex-direction:column;gap:12px;flex-shrink:0}
+.cta-big-btn{background:var(--pink);color:#fff;padding:20px 48px;font-size:14px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:opacity .15s;white-space:nowrap}
+.cta-big-btn:hover{opacity:.85}
+.cta-note{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:center}
+/* FOOTER */
+footer{padding:24px 60px;border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.foot-l{font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.foot-l .pink{color:var(--pink)}
+.foot-r{font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--dim);text-transform:uppercase}
+@media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:58px}.hero-right{display:none}.features{grid-template-columns:1fr}.feature-col{border-right:0}.pipe-steps{grid-template-columns:1fr 1fr}.cta{grid-template-columns:1fr}.nav-mid{display:none}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-brand"><div class="nav-brand-name">Starvox</div><div class="nav-brand-badge">Master AI</div></div>
+  <div class="nav-mid">
+    <a class="nav-link" href="#">Agents</a>
+    <a class="nav-link" href="#">Products</a>
+    <a class="nav-link" href="#">Pricing</a>
+    <a class="nav-link" href="#">Docs</a>
+  </div>
+  <button class="nav-cta">Start now →</button>
+</nav>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="tick-item">16 Agents Active</span>
+    <span class="tick-item">31 Tools Ready</span>
+    <span class="tick-item">25 AI Models</span>
+    <span class="tick-item">10 Providers</span>
+    <span class="tick-item">$0.03/build</span>
+    <span class="tick-item">99.9% Uptime</span>
+    <span class="tick-item">16 Agents Active</span>
+    <span class="tick-item">31 Tools Ready</span>
+    <span class="tick-item">25 AI Models</span>
+    <span class="tick-item">10 Providers</span>
+    <span class="tick-item">$0.03/build</span>
+    <span class="tick-item">99.9% Uptime</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-num">Master AI OS</div>
+    <h1>BUILD<br><span class="accent">FASTER.</span><br><span class="outline">THINK</span><br>BIGGER.</h1>
+    <p class="hero-desc">Starvox is the world's first AI company OS. 16 specialist agents handle spec, code, QA, security, deploy, and monitoring — simultaneously.</p>
+    <div class="hero-btns">
+      <button class="hbtn hbtn-pink">Start free →</button>
+      <button class="hbtn hbtn-outline">Watch demo</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-stat-grid">
+      <div class="hero-stat"><div class="hero-stat-n c-pink">16</div><div class="hero-stat-l">Agents</div></div>
+      <div class="hero-stat"><div class="hero-stat-n c-cyan">31</div><div class="hero-stat-l">Tools</div></div>
+      <div class="hero-stat"><div class="hero-stat-n c-yellow">25</div><div class="hero-stat-l">Models</div></div>
+      <div class="hero-stat"><div class="hero-stat-n c-white">10</div><div class="hero-stat-l">Providers</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="features">
+  <div class="feature-col">
+    <div class="feat-header"><span class="feat-num">Agent 01 / PM</span><span class="feat-icon">🎯</span></div>
+    <div class="feat-body"><div class="feat-name">Project Manager</div><div class="feat-desc">Turns a sentence into a full spec, builds a subtask DAG, assigns work to specialist agents, and reports back.</div><div class="feat-tags"><span class="ftag">spec</span><span class="ftag">orchestrate</span><span class="ftag">roadmap</span></div></div>
+  </div>
+  <div class="feature-col">
+    <div class="feat-header"><span class="feat-num">Agent 03 / BE</span><span class="feat-icon">⚙️</span></div>
+    <div class="feat-body"><div class="feat-name">Backend Dev</div><div class="feat-desc">Builds FastAPI/Node APIs with DB schemas and integrations. Runs code in a sandbox and self-corrects until tests pass.</div><div class="feat-tags"><span class="ftag">fastapi</span><span class="ftag">supabase</span><span class="ftag">sandbox</span></div></div>
+  </div>
+  <div class="feature-col">
+    <div class="feat-header"><span class="feat-num">Agent 06 / OPS</span><span class="feat-icon">🚀</span></div>
+    <div class="feat-body"><div class="feat-name">DevOps Agent</div><div class="feat-desc">SSH deploy, git pull, service restart, health check, and auto-rollback on failure. Every release, zero touch.</div><div class="feat-tags"><span class="ftag">deploy</span><span class="ftag">rollback</span><span class="ftag">ssh</span></div></div>
+  </div>
+</div>
+
+<div class="pipeline">
+  <div class="pipe-header">
+    <div class="pipe-h">THE <span class="outline">PIPELINE</span></div>
+  </div>
+  <div class="pipe-steps">
+    <div class="pstep"><div class="pstep-n">Step 01</div><div class="pstep-lbl" style="color:var(--pink)">Intent</div><div class="pstep-sub">Natural language</div></div>
+    <div class="pstep"><div class="pstep-n">Step 02</div><div class="pstep-lbl" style="color:var(--cyan)">Spec</div><div class="pstep-sub">PM Agent</div></div>
+    <div class="pstep"><div class="pstep-n">Step 03</div><div class="pstep-lbl" style="color:var(--yellow)">Build</div><div class="pstep-sub">Dev Agents ×N</div></div>
+    <div class="pstep"><div class="pstep-n">Step 04</div><div class="pstep-lbl">Test</div><div class="pstep-sub">QA + Security</div></div>
+    <div class="pstep"><div class="pstep-n">Step 05</div><div class="pstep-lbl" style="color:var(--pink)">Deploy</div><div class="pstep-sub">DevOps Agent</div></div>
+    <div class="pstep"><div class="pstep-n">Step 06</div><div class="pstep-lbl" style="color:#4ade80">Monitor</div><div class="pstep-sub">24/7 watch</div></div>
+  </div>
+</div>
+
+<div class="cta">
+  <h2>YOUR AI TEAM.<br><span class="outline">STARTS</span><br><span class="pink">NOW.</span></h2>
+  <div class="cta-right">
+    <button class="cta-big-btn">Open Starvox →</button>
+    <div class="cta-note">Free to start · No CC required</div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-l">STAR<span class="pink">VOX</span></div>
+  <div class="foot-r">© 2025 Vaanilabs</div>
+</footer>
+</body>
+</html>

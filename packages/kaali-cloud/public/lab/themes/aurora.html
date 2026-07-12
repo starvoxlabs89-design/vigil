@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starvox — Aurora</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;color:#fff;overflow-x:hidden}
+/* ANIMATED AURORA BG */
+body{background:#060010;position:relative}
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aurora-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;animation:drift 18s ease-in-out infinite alternate}
+.orb1{width:700px;height:700px;background:radial-gradient(circle,#7c3aed,transparent 70%);top:-200px;left:-200px;animation-duration:20s}
+.orb2{width:600px;height:600px;background:radial-gradient(circle,#2563eb,transparent 70%);bottom:-100px;right:-100px;animation-duration:15s;animation-delay:-7s}
+.orb3{width:500px;height:500px;background:radial-gradient(circle,#ec4899,transparent 70%);top:40%;left:30%;animation-duration:25s;animation-delay:-12s;opacity:.35}
+.orb4{width:400px;height:400px;background:radial-gradient(circle,#06b6d4,transparent 70%);top:20%;right:10%;animation-duration:22s;animation-delay:-5s;opacity:.3}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,-40px) scale(1.1)}66%{transform:translate(-40px,60px) scale(.95)}100%{transform:translate(30px,20px) scale(1.05)}}
+/* GLASS PANEL */
+.glass{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:16px}
+.glass-dark{background:rgba(0,0,0,.35);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:20px}
+/* LAYOUT */
+.wrap{position:relative;z-index:1}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 48px;display:flex;align-items:center;gap:24px;background:rgba(6,0,16,.5);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-logo{font-size:16px;font-weight:800;letter-spacing:-0.02em;flex:1}
+.nav-logo .glow{background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-links{display:flex;gap:28px}
+.nav-links a{color:rgba(255,255,255,.5);text-decoration:none;font-size:13px;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-pill{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;padding:8px 22px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s,transform .15s}
+.nav-pill:hover{opacity:.9;transform:translateY(-1px)}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:0.04em;margin-bottom:32px;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:#c4b5fd}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:#a78bfa;box-shadow:0 0 8px #a78bfa;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px #a78bfa}50%{opacity:.5;box-shadow:0 0 2px #a78bfa}}
+.hero h1{font-size:clamp(44px,7.5vw,104px);font-weight:800;letter-spacing:-0.05em;line-height:.93;margin-bottom:24px}
+.hero h1 .grad{background:linear-gradient(135deg,#fff 20%,#c4b5fd 50%,#38bdf8 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.6);line-height:1.75;max-width:500px;margin:0 auto 48px}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:64px}
+.btn-grad{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:none;padding:14px 32px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 32px rgba(124,58,237,.4);transition:all .2s;letter-spacing:.01em}
+.btn-grad:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,58,237,.55)}
+.btn-glass{padding:14px 32px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);backdrop-filter:blur(8px);transition:all .2s}
+.btn-glass:hover{color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1)}
+/* STATS */
+.stats-glass{display:grid;grid-template-columns:repeat(4,1fr);max-width:700px;margin:0 auto;text-align:center;padding:24px;gap:0}
+.stat{padding:16px;border-right:1px solid rgba(255,255,255,.08)}
+.stat:last-child{border-right:0}
+.stat-n{font-size:36px;font-weight:800;letter-spacing:-0.04em;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-l{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+/* AGENTS */
+.agents-section{padding:100px 48px;max-width:1100px;margin:0 auto}
+.sec-header{text-align:center;margin-bottom:56px}
+.sec-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;margin-bottom:14px}
+.sec-title{font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;color:#fff}
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.agent-card{padding:24px;transition:all .25s;cursor:default}
+.agent-card:hover{transform:translateY(-4px);background:rgba(255,255,255,.09)!important;border-color:rgba(124,58,237,.5)!important}
+.agent-icon{font-size:28px;margin-bottom:14px}
+.agent-name{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:-.01em}
+.agent-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.65}
+.agent-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tag{font-size:10px;padding:2px 10px;border-radius:999px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:#c4b5fd}
+/* PIPELINE */
+.pipe-section{padding:0 48px 100px;max-width:900px;margin:0 auto}
+.pipe-track{display:flex;align-items:flex-start;gap:0;position:relative;margin-top:56px}
+.pipe-track::before{content:"";position:absolute;top:28px;left:28px;right:28px;height:2px;background:linear-gradient(90deg,#7c3aed,#2563eb,#06b6d4);opacity:.4;border-radius:2px}
+.pipe-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;z-index:1}
+.pipe-orb{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:all .25s}
+.pipe-node:hover .pipe-orb{transform:translateY(-4px) scale(1.1)}
+.pipe-lbl{font-size:12px;font-weight:600;color:#fff;text-align:center}
+.pipe-sub{font-size:10px;color:rgba(255,255,255,.35);text-align:center}
+/* CTA */
+.cta-section{padding:100px 48px;text-align:center}
+.cta-card{padding:80px 48px;max-width:720px;margin:0 auto;position:relative;overflow:hidden}
+.cta-glow{position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,.3),transparent 70%);pointer-events:none}
+.cta-card h2{font-size:clamp(32px,5vw,60px);font-weight:800;letter-spacing:-0.04em;line-height:1;margin-bottom:16px}
+.cta-card h2 .grad{background:linear-gradient(135deg,#fff,#c4b5fd,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-card p{color:rgba(255,255,255,.5);font-size:15px;margin-bottom:36px}
+footer{padding:32px 48px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.footer-logo{font-size:14px;font-weight:800;letter-spacing:-.01em}
+.footer-logo .grad{background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer-copy{font-size:11px;color:rgba(255,255,255,.3)}
+@media(max-width:768px){.agents-grid{grid-template-columns:1fr}.stats-glass{grid-template-columns:1fr 1fr}.agents-section,.pipe-section,.cta-section{padding-left:20px;padding-right:20px}.pipe-track::before{display:none}.nav-links{display:none}nav{padding:14px 20px}}
+</style>
+</head>
+<body>
+<div class="aurora">
+  <div class="aurora-orb orb1"></div>
+  <div class="aurora-orb orb2"></div>
+  <div class="aurora-orb orb3"></div>
+  <div class="aurora-orb orb4"></div>
+</div>
+<div class="wrap">
+<nav>
+  <div class="nav-logo"><span class="glow">Starvox</span></div>
+  <div class="nav-links"><a href="#">Agents</a><a href="#">Products</a><a href="#">Pricing</a><a href="#">Docs</a></div>
+  <button class="nav-pill">Get started</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge"><span class="hero-badge-dot"></span>16 agents · 25 models · always on</div>
+  <h1><span class="grad">The AI OS<br>your company<br>deserves.</span></h1>
+  <p class="hero-sub">From a single sentence to a deployed, tested, monitored product. Starvox replaces your entire engineering workflow with intelligent agents.</p>
+  <div class="hero-actions">
+    <button class="btn-grad">Start building free →</button>
+    <button class="btn-glass">Watch 2-min demo</button>
+  </div>
+  <div class="stats-glass glass-dark">
+    <div class="stat"><div class="stat-n">16</div><div class="stat-l">Agents</div></div>
+    <div class="stat"><div class="stat-n">31</div><div class="stat-l">Tools</div></div>
+    <div class="stat"><div class="stat-n">10</div><div class="stat-l">Providers</div></div>
+    <div class="stat"><div class="stat-n">$0.03</div><div class="stat-l">Per build</div></div>
+  </div>
+</section>
+
+<div class="agents-section">
+  <div class="sec-header">
+    <div class="sec-eyebrow">The roster</div>
+    <div class="sec-title">An AI team that never sleeps.</div>
+  </div>
+  <div class="agents-grid">
+    <div class="agent-card glass"><div class="agent-icon">🎯</div><div class="agent-name">PM Agent</div><div class="agent-desc">Decomposes your intent into a spec and subtask DAG, then orchestrates the rest of the team.</div><div class="agent-tags"><span class="tag">spec</span><span class="tag">orchestrate</span></div></div>
+    <div class="agent-card glass"><div class="agent-icon">🎨</div><div class="agent-name">Frontend Dev</div><div class="agent-desc">Builds pixel-perfect UI components in React, Vue, or vanilla. Knows your design system.</div><div class="agent-tags"><span class="tag">react</span><span class="tag">css</span></div></div>
+    <div class="agent-card glass"><div class="agent-icon">⚙️</div><div class="agent-name">Backend Dev</div><div class="agent-desc">APIs, DB schemas, integrations. Runs code in a sandbox and self-corrects on errors.</div><div class="agent-tags"><span class="tag">fastapi</span><span class="tag">supabase</span></div></div>
+    <div class="agent-card glass"><div class="agent-icon">🧪</div><div class="agent-name">QA Agent</div><div class="agent-desc">Writes and runs tests. Browser-driven flows. Regression checks. Catches bugs before you do.</div><div class="agent-tags"><span class="tag">testing</span><span class="tag">browser</span></div></div>
+    <div class="agent-card glass"><div class="agent-icon">🔒</div><div class="agent-name">Security Agent</div><div class="agent-desc">Audits every release. OWASP top 10, leaked keys, insecure deps — caught automatically.</div><div class="agent-tags"><span class="tag">owasp</span><span class="tag">audit</span></div></div>
+    <div class="agent-card glass"><div class="agent-icon">🚀</div><div class="agent-name">DevOps Agent</div><div class="agent-desc">SSH deploy, git pull, restart services, health check, auto-rollback. Zero touch, every time.</div><div class="agent-tags"><span class="tag">deploy</span><span class="tag">rollback</span></div></div>
+  </div>
+</div>
+
+<div class="pipe-section">
+  <div class="sec-header">
+    <div class="sec-eyebrow">The pipeline</div>
+    <div class="sec-title">Every release, same flow.</div>
+  </div>
+  <div class="pipe-track">
+    <div class="pipe-node"><div class="pipe-orb glass-dark" style="border-color:rgba(124,58,237,.5);box-shadow:0 0 24px rgba(124,58,237,.3)">01</div><div class="pipe-lbl">Intent</div><div class="pipe-sub">You</div></div>
+    <div class="pipe-node"><div class="pipe-orb glass-dark" style="border-color:rgba(56,189,248,.4);box-shadow:0 0 24px rgba(56,189,248,.25)">02</div><div class="pipe-lbl">Spec</div><div class="pipe-sub">PM Agent</div></div>
+    <div class="pipe-node"><div class="pipe-orb glass-dark" style="border-color:rgba(52,211,153,.4);box-shadow:0 0 24px rgba(52,211,153,.25)">03</div><div class="pipe-lbl">Build</div><div class="pipe-sub">Dev ×N</div></div>
+    <div class="pipe-node"><div class="pipe-orb glass-dark" style="border-color:rgba(251,146,60,.4);box-shadow:0 0 24px rgba(251,146,60,.25)">04</div><div class="pipe-lbl">Test</div><div class="pipe-sub">QA + Sec</div></div>
+    <div class="pipe-node"><div class="pipe-orb glass-dark" style="border-color:rgba(248,113,113,.4);box-shadow:0 0 24px rgba(248,113,113,.25)">05</div><div class="pipe-lbl">Deploy</div><div class="pipe-sub">DevOps</div></div>
+    <div class="pipe-node"><div class="pipe-orb glass-dark" style="border-color:rgba(74,222,128,.4);box-shadow:0 0 24px rgba(74,222,128,.25)">06</div><div class="pipe-lbl">Monitor</div><div class="pipe-sub">24/7</div></div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <div class="cta-card glass-dark">
+    <div class="cta-glow"></div>
+    <h2><span class="grad">Ship your next<br>product today.</span></h2>
+    <p>No setup. No config. Just describe what you want to build.</p>
+    <button class="btn-grad">Open Starvox free →</button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo"><span class="grad">Starvox</span></div>
+  <div class="footer-copy">© 2025 Vaanilabs · Built with Starvox</div>
+</footer>
+</div>
+</body>
+</html>

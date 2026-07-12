@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starvox — Theme Preview</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0a0a0f;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+
+/* SWITCHER BAR */
+.bar{position:fixed;top:0;left:0;right:0;z-index:1000;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(10,10,15,.92);backdrop-filter:blur(28px);border-bottom:1px solid rgba(255,255,255,.07)}
+
+.bar-logo{font-size:14px;font-weight:800;letter-spacing:-.03em;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.bar-pills{display:flex;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:4px}
+
+.pill{padding:7px 20px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,.4);transition:all .2s;letter-spacing:.01em;display:flex;align-items:center;gap:7px}
+.pill:hover{color:rgba(255,255,255,.7)}
+.pill.active{color:#fff;background:rgba(255,255,255,.1)}
+.pill.active.t-aurora{background:rgba(124,58,237,.25);color:#c4b5fd;box-shadow:0 0 20px rgba(124,58,237,.2)}
+.pill.active.t-brutalist{background:rgba(255,45,120,.2);color:#ff8fb0}
+.pill.active.t-mint{background:rgba(61,139,110,.2);color:#6dc49c}
+
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.aurora-dot{background:linear-gradient(135deg,#f472b6,#a78bfa)}
+.brutalist-dot{background:#ff2d78}
+.mint-dot{background:#3d8b6e}
+
+.bar-right{display:flex;align-items:center;gap:16px}
+.bar-label{font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.04em}
+.bar-open{padding:7px 18px;border-radius:8px;font-size:12px;font-weight:700;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);cursor:pointer;text-decoration:none;transition:all .15s;letter-spacing:.01em}
+.bar-open:hover{background:rgba(255,255,255,.14);color:#fff}
+
+/* IFRAME */
+#frame{position:fixed;top:52px;left:0;right:0;bottom:0;width:100%;height:calc(100vh - 52px);border:none;transition:opacity .15s}
+.fading{opacity:0}
+
+/* TRANSITION OVERLAY */
+.overlay{position:fixed;top:52px;left:0;right:0;bottom:0;background:#0a0a0f;z-index:500;opacity:0;pointer-events:none;transition:opacity .15s}
+.overlay.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="bar-logo">Starvox</div>
+  <div class="bar-pills">
+    <button class="pill t-aurora active" onclick="switchTheme('aurora',this)">
+      <span class="pill-dot aurora-dot"></span>Aurora
+    </button>
+    <button class="pill t-brutalist" onclick="switchTheme('brutalist',this)">
+      <span class="pill-dot brutalist-dot"></span>Brutalist
+    </button>
+    <button class="pill t-mint" onclick="switchTheme('mint',this)">
+      <span class="pill-dot mint-dot"></span>Mint
+    </button>
+  </div>
+  <div class="bar-right">
+    <span class="bar-label" id="bar-label">Aurora Glassmorphism</span>
+    <a class="bar-open" id="bar-open" href="aurora-full.html" target="_blank">Open full page ↗</a>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<iframe id="frame" src="aurora-full.html"></iframe>
+
+<script>
+const themes = {
+  aurora: { file: 'aurora-full.html', label: 'Aurora Glassmorphism' },
+  brutalist: { file: 'brutalist-full.html', label: 'Neon Brutalist' },
+  mint: { file: 'mint.html', label: 'Mint Pastel' }
+};
+
+let current = 'aurora';
+
+function switchTheme(name, btn) {
+  if (name === current) return;
+  current = name;
+
+  // activate pill
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+
+  // update label + open link
+  document.getElementById('bar-label').textContent = themes[name].label;
+  document.getElementById('bar-open').href = themes[name].file;
+
+  // fade transition
+  const overlay = document.getElementById('overlay');
+  const frame = document.getElementById('frame');
+  overlay.classList.add('show');
+
+  setTimeout(() => {
+    frame.src = themes[name].file;
+    frame.onload = () => {
+      setTimeout(() => overlay.classList.remove('show'), 80);
+    };
+  }, 120);
+}
+</script>
+</body>
+</html>

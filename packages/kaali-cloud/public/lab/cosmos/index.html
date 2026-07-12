@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Starvox · Nada Brahma — the fluid black-hole sound</title>
+    <style>
+      :root { --gold: #e9c46a; --ink: #050307; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; background: var(--ink); overflow: hidden; }
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: #f4f1e8; cursor: crosshair;
+      }
+      #app { position: fixed; inset: 0; }
+      canvas { display: block; }
+
+      .ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+      .brand {
+        position: absolute; top: 38px; left: 46px;
+        letter-spacing: 0.42em; font-size: 12px; font-weight: 600; text-transform: uppercase;
+        opacity: 0; animation: fade 1.4s ease 0.3s forwards;
+      }
+      .brand span { color: var(--gold); }
+
+      .headline {
+        position: absolute; left: 46px; bottom: 92px; max-width: 640px;
+        opacity: 0; animation: fade 1.8s ease 0.7s forwards;
+      }
+      .headline .deva { display:block; font-size:15px; letter-spacing:0.34em; color:var(--gold); margin-bottom:16px; font-weight:500; }
+      .headline h1 { font-size: clamp(30px,5.5vw,64px); line-height:1.0; font-weight:300; letter-spacing:-0.02em; }
+      .headline h1 b { font-weight:600; }
+      .headline p { margin-top:18px; font-size:14.5px; line-height:1.6; color:#a7a496; max-width:460px; }
+
+      .fact {
+        position:absolute; right:46px; bottom:92px; max-width:300px; text-align:right;
+        opacity:0; animation: fade 1.8s ease 1.1s forwards;
+      }
+      .fact .tag { font-size:10.5px; letter-spacing:0.28em; text-transform:uppercase; }
+      .fact .tag.real { color:#7bd88f; }
+      .fact .tag.myth { color:#e88f7b; }
+      .fact p { font-size:12.5px; line-height:1.55; color:#8f8c80; margin-top:8px; }
+      .fact p b { color:#cbc8bb; font-weight:500; }
+
+      .hint {
+        position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+        font-size:10.5px; letter-spacing:0.3em; text-transform:uppercase; color:#57544a;
+        opacity:0; animation: fade 2s ease 1.6s forwards;
+      }
+      .vignette { position:fixed; inset:0; pointer-events:none; z-index:5;
+        background: radial-gradient(circle at 50% 46%, transparent 32%, rgba(5,3,7,0.5) 80%, rgba(5,3,7,0.92) 100%); }
+      @keyframes fade { to { opacity:1; } }
+    </style>
+    <script type="module" crossorigin src="/assets/index-Dllt3ugJ.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="vignette"></div>
+    <div class="ui">
+      <div class="brand">STAR<span>VOX</span> · NADA BRAHMA</div>
+      <div class="headline">
+        <h1><span class="deva">नाद ब्रह्म — the world is sound</span>Touch the<br /><b>black hole's note.</b></h1>
+        <p>The supermassive black hole in the Perseus cluster rings the surrounding gas at a real B♭ — about 57 octaves below middle C. You're dragging that medium now.</p>
+      </div>
+      <div class="fact">
+        <div class="tag real">◤ Verified · NASA / Chandra</div>
+        <p>The <b>sound is real</b> — pressure waves in the intracluster gas, sonified up 57–58 octaves to be heard.</p>
+        <div class="tag myth" style="margin-top:14px;">◤ Folklore · not NASA</div>
+        <p>The "it's the sound of <b>Om</b>" claim is social-media attribution — NASA never said it.</p>
+      </div>
+      <div class="hint">Drag across the plasma</div>
+    </div>
+  </body>
+</html>
