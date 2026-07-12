@@ -21,7 +21,9 @@ const CT = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf
 
 async function serveStatic(req, res) {
   let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
-  if (p === "/") p = "/index.html";
+  // Any path ending with "/" maps to its directory's index.html
+  // (root "/" → "/index.html", "/lab/" → "/lab/index.html", etc.)
+  if (p.endsWith("/")) p = p + "index.html";
   const abs = normalize(join(PUBLIC_DIR, p));
   if (!abs.startsWith(PUBLIC_DIR)) return text(res, 403, "forbidden");
   try {
