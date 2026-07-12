@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaali #5 — Mandala Firewall</title>
+<style>
+  body{margin:0;background:#050710;color:#e6edf3;font-family:Inter,-apple-system,system-ui,sans-serif;overflow:hidden;height:100vh}
+  #c{position:fixed;inset:0;display:block}
+  .ui{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .brand{position:absolute;top:32px;left:40px;font-size:12px;letter-spacing:.42em;font-weight:600;text-transform:uppercase;opacity:.9}
+  .brand span{color:#f472b6}
+  h1{position:absolute;left:40px;bottom:180px;max-width:640px;margin:0;
+    font:400 clamp(38px,5.5vw,68px)/1.05 'Playfair Display',serif;letter-spacing:-.02em}
+  h1 em{font-style:italic;background:linear-gradient(135deg,#f472b6,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{position:absolute;left:40px;bottom:120px;max-width:520px;color:#8b97a6;font-size:15px;line-height:1.55}
+  .stats{position:absolute;right:40px;bottom:80px;text-align:right;font-family:ui-monospace,monospace;font-size:12px}
+  .stats .row{margin-top:6px;color:#8b97a6}
+  .stats .val{color:#f472b6;font-weight:700}
+  .caption{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    color:#5b6674;font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <div class="brand">KAALI <span>·</span> MANDALA FIREWALL</div>
+  <h1>Seven mandalas.<br><em>None get through.</em></h1>
+  <p class="sub">Every threat has to pass seven concentric mandala layers. Prompt-injection dies at layer 1. PII exfiltration at layer 3. MCP tool abuse at layer 5.</p>
+  <div class="stats">
+    <div class="row">layer 1 stops <span class="val" id="l1">0</span></div>
+    <div class="row">layer 3 stops <span class="val" id="l3">0</span></div>
+    <div class="row">layer 5 stops <span class="val" id="l5">0</span></div>
+    <div class="row">layer 7 breaches <span class="val" style="color:#f87171">0</span></div>
+  </div>
+  <div class="caption">Kaali #5 · Mandala Firewall</div>
+</div>
+<script>
+const cv=document.getElementById('c'),ct=cv.getContext('2d');
+let W,H,DPR;
+function fit(){DPR=devicePixelRatio||1;W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+fit();addEventListener('resize',fit);
+
+const threats=[];const stops=[0,0,0,0,0,0,0];
+function spawn(){
+  const a=Math.random()*Math.PI*2;
+  const r=Math.min(W,H)*0.55;
+  const killAt=Math.floor(Math.random()*6)+1; // Layer 1..6 usually
+  threats.push({
+    x:Math.cos(a)*r,y:Math.sin(a)*r,
+    vx:-Math.cos(a)*(2+Math.random()*2)*DPR,
+    vy:-Math.sin(a)*(2+Math.random()*2)*DPR,
+    killAt,dead:false,flash:0
+  });
+}
+setInterval(spawn,120);
+
+const LAYERS=7;
+function frame(t){
+  ct.fillStyle='rgba(5,7,16,.28)';ct.fillRect(0,0,W,H);
+  ct.save();ct.translate(W/2,H/2);
+
+  const RMAX=Math.min(W,H)*0.36;
+  const colors=[
+    'rgba(244,114,182,',  // Layer 1 outermost
+    'rgba(251,146,60,',
+    'rgba(251,191,36,',
+    'rgba(94,234,212,',
+    'rgba(56,189,248,',
+    'rgba(167,139,250,',
+    'rgba(255,255,255,'   // Layer 7 innermost core
+  ];
+
+  // Draw 7 concentric mandala layers
+  for(let L=0;L<LAYERS;L++){
+    const rr=RMAX*(1-L/LAYERS)+RMAX*0.12;
+    const rot=t*0.0003*(L%2?1:-1)*(L+1);
+    ct.save();ct.rotate(rot);
+    ct.strokeStyle=colors[L]+'0.5)';
+    ct.lineWidth=1.2*DPR;
+    // Petal geometry: 6+2L petals per layer
+    const petals=6+L*3;
+    ct.beginPath();
+    for(let i=0;i<petals;i++){
+      const a=i/petals*Math.PI*2;
+      const x=Math.cos(a)*rr,y=Math.sin(a)*rr;
+      const cx=Math.cos(a+Math.PI/petals)*rr*0.7;
+      const cy=Math.sin(a+Math.PI/petals)*rr*0.7;
+      if(i===0)ct.moveTo(x,y);else ct.quadraticCurveTo(cx,cy,x,y);
+    }
+    ct.closePath();ct.stroke();
+    // Also draw the base ring
+    ct.strokeStyle=colors[L]+'0.15)';
+    ct.beginPath();ct.arc(0,0,rr,0,Math.PI*2);ct.stroke();
+    ct.restore();
+  }
+
+  // Central protected core
+  const cg=ct.createRadialGradient(0,0,0,0,0,RMAX*0.08);
+  cg.addColorStop(0,'#fff');cg.addColorStop(1,'rgba(255,255,255,0)');
+  ct.fillStyle=cg;ct.beginPath();ct.arc(0,0,RMAX*0.08,0,Math.PI*2);ct.fill();
+
+  // Threats
+  for(let i=threats.length-1;i>=0;i--){
+    const th=threats[i];
+    if(th.dead){
+      th.flash*=0.88;
+      if(th.flash<0.02){threats.splice(i,1);continue;}
+      const g=ct.createRadialGradient(th.x,th.y,0,th.x,th.y,40*DPR*th.flash);
+      g.addColorStop(0,`rgba(244,114,182,${th.flash})`);g.addColorStop(1,'rgba(244,114,182,0)');
+      ct.fillStyle=g;ct.beginPath();ct.arc(th.x,th.y,40*DPR,0,Math.PI*2);ct.fill();
+      continue;
+    }
+    th.x+=th.vx;th.y+=th.vy;
+    const d=Math.hypot(th.x,th.y);
+    // Check current layer we're in
+    for(let L=0;L<LAYERS;L++){
+      const rr=RMAX*(1-L/LAYERS)+RMAX*0.12;
+      if(d<rr&&th.killAt===LAYERS-L){
+        th.dead=true;th.flash=1;stops[L]++;
+        break;
+      }
+    }
+    ct.fillStyle='rgba(248,113,113,0.9)';
+    ct.beginPath();ct.arc(th.x,th.y,3*DPR,0,Math.PI*2);ct.fill();
+    ct.strokeStyle='rgba(248,113,113,0.35)';ct.lineWidth=1.2*DPR;
+    ct.beginPath();ct.moveTo(th.x,th.y);ct.lineTo(th.x+th.vx*4,th.y+th.vy*4);ct.stroke();
+  }
+  ct.restore();
+
+  document.getElementById('l1').textContent=stops[0].toLocaleString();
+  document.getElementById('l3').textContent=stops[2].toLocaleString();
+  document.getElementById('l5').textContent=stops[4].toLocaleString();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>

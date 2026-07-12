@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaali #3 — Third Eye Watchtower</title>
+<style>
+  body{margin:0;background:#050710;color:#e6edf3;font-family:Inter,-apple-system,system-ui,sans-serif;overflow:hidden;height:100vh}
+  #c{position:fixed;inset:0;display:block}
+  .ui{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .brand{position:absolute;top:32px;left:40px;font-size:12px;letter-spacing:.42em;font-weight:600;text-transform:uppercase;opacity:.9}
+  .brand span{color:#a78bfa}
+  h1{position:absolute;left:40px;bottom:180px;max-width:640px;margin:0;
+    font:400 clamp(38px,5.5vw,68px)/1.05 'Playfair Display',serif;letter-spacing:-.02em}
+  h1 em{font-style:italic;background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{position:absolute;left:40px;bottom:120px;max-width:520px;color:#8b97a6;font-size:15px;line-height:1.55}
+  .stats{position:absolute;right:40px;bottom:80px;text-align:right;font-family:ui-monospace,monospace;font-size:12px}
+  .stats .row{margin-top:6px;color:#8b97a6}
+  .stats .val{color:#a78bfa;font-weight:700}
+  .caption{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    color:#5b6674;font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <div class="brand">KAALI <span>·</span> THIRD EYE</div>
+  <h1>Nothing hides<br>from the <em>Third Eye.</em></h1>
+  <p class="sub">A single all-seeing sensor at the core of your stack. Sweeps 360° every 3 seconds. Every threat is spotted, ranked, and blocked before your model sees it.</p>
+  <div class="stats">
+    <div class="row">objects seen <span class="val" id="seen">0</span></div>
+    <div class="row">threats flagged <span class="val" id="flagged">0</span></div>
+    <div class="row">sweep <span class="val">120° / sec</span></div>
+  </div>
+  <div class="caption">Kaali #3 · Third Eye Watchtower</div>
+</div>
+<script>
+const cv=document.getElementById('c'),ct=cv.getContext('2d');
+let W,H,DPR;
+function fit(){DPR=devicePixelRatio||1;W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+fit();addEventListener('resize',fit);
+
+const dots=[];let seen=0,flagged=0;
+function spawn(){
+  const a=Math.random()*Math.PI*2;
+  const r=Math.min(W,H)*(0.15+Math.random()*0.25);
+  const bad=Math.random()<0.28;
+  dots.push({a,r,bad,x:Math.cos(a)*r,y:Math.sin(a)*r,seen:false,flag:0,life:1});
+  seen++;
+}
+setInterval(spawn,150);
+setInterval(()=>{
+  // Occasionally clean up old ones
+  for(let i=dots.length-1;i>=0;i--){dots[i].life-=0.06;if(dots[i].life<=0)dots.splice(i,1)}
+},400);
+
+let sweep=0;
+function frame(t){
+  ct.fillStyle='rgba(5,7,16,.28)';ct.fillRect(0,0,W,H);
+  ct.save();ct.translate(W/2,H/2);
+
+  const R=Math.min(W,H)*0.42;
+  sweep=(sweep+0.025)%(Math.PI*2);
+
+  // Cosmic backdrop rings
+  ct.strokeStyle='rgba(167,139,250,0.06)';ct.lineWidth=1*DPR;
+  for(let i=1;i<=6;i++){
+    ct.beginPath();ct.arc(0,0,R*i/6,0,Math.PI*2);ct.stroke();
+  }
+  ct.strokeStyle='rgba(167,139,250,0.05)';
+  for(let i=0;i<12;i++){
+    const a=i/12*Math.PI*2;
+    ct.beginPath();ct.moveTo(0,0);ct.lineTo(Math.cos(a)*R,Math.sin(a)*R);ct.stroke();
+  }
+
+  // Sweep beam
+  const beamGrd=ct.createConicGradient(sweep-0.5,0,0);
+  beamGrd.addColorStop(0,'rgba(167,139,250,0)');
+  beamGrd.addColorStop(0.45,'rgba(167,139,250,0.4)');
+  beamGrd.addColorStop(0.55,'rgba(167,139,250,0)');
+  beamGrd.addColorStop(1,'rgba(167,139,250,0)');
+  ct.fillStyle=beamGrd;ct.beginPath();ct.arc(0,0,R,0,Math.PI*2);ct.fill();
+
+  // Dots (potential threats)
+  dots.forEach(d=>{
+    // Detect if sweep is near this dot's angle
+    const angDiff=Math.abs(((d.a-sweep+Math.PI*3)%(Math.PI*2))-Math.PI);
+    if(angDiff<0.25&&!d.seen){d.seen=true;if(d.bad){d.flag=1;flagged++}}
+    if(d.flag>0){d.flag=Math.min(1,d.flag);d.flag*=0.98}
+    const alpha=d.life;
+    ct.fillStyle=d.bad&&d.seen?`rgba(248,113,113,${alpha})`:`rgba(94,234,212,${alpha*0.7})`;
+    const size=d.bad&&d.seen?4:2.2;
+    ct.beginPath();ct.arc(d.x,d.y,size*DPR,0,Math.PI*2);ct.fill();
+    if(d.flag>0.05){
+      ct.strokeStyle=`rgba(248,113,113,${d.flag*0.8})`;
+      ct.lineWidth=1.5*DPR;
+      ct.beginPath();ct.arc(d.x,d.y,(6+d.flag*10)*DPR,0,Math.PI*2);ct.stroke();
+    }
+  });
+
+  // The Eye - central
+  // Iris outer glow
+  const ig=ct.createRadialGradient(0,0,0,0,0,R*0.18);
+  ig.addColorStop(0,'rgba(244,114,182,0.8)');
+  ig.addColorStop(0.4,'rgba(167,139,250,0.5)');
+  ig.addColorStop(1,'rgba(167,139,250,0)');
+  ct.fillStyle=ig;ct.beginPath();ct.arc(0,0,R*0.18,0,Math.PI*2);ct.fill();
+  // Iris ring
+  ct.strokeStyle='rgba(244,114,182,0.9)';ct.lineWidth=2*DPR;
+  ct.beginPath();ct.arc(0,0,R*0.09,0,Math.PI*2);ct.stroke();
+  // Pupil
+  ct.fillStyle='#050710';
+  ct.beginPath();ct.arc(0,0,R*0.045,0,Math.PI*2);ct.fill();
+  // Bright glint (breathing)
+  const gl=Math.sin(t/500)*.3+.7;
+  ct.fillStyle=`rgba(255,255,255,${gl})`;
+  ct.beginPath();ct.arc(-R*0.015,-R*0.015,R*0.015,0,Math.PI*2);ct.fill();
+  // Outer eye almond shape
+  ct.strokeStyle='rgba(167,139,250,0.6)';ct.lineWidth=1.5*DPR;
+  ct.beginPath();
+  ct.moveTo(-R*0.2,0);
+  ct.quadraticCurveTo(0,-R*0.09,R*0.2,0);
+  ct.quadraticCurveTo(0,R*0.09,-R*0.2,0);
+  ct.stroke();
+
+  ct.restore();
+
+  document.getElementById('seen').textContent=seen.toLocaleString();
+  document.getElementById('flagged').textContent=flagged.toLocaleString();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>

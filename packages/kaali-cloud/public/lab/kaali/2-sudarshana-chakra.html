@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaali #2 — Sudarshana Chakra</title>
+<style>
+  body{margin:0;background:#050710;color:#e6edf3;font-family:Inter,-apple-system,system-ui,sans-serif;overflow:hidden;height:100vh}
+  #c{position:fixed;inset:0;display:block}
+  .ui{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .brand{position:absolute;top:32px;left:40px;font-size:12px;letter-spacing:.42em;font-weight:600;text-transform:uppercase;opacity:.9}
+  .brand span{color:#fbbf24}
+  h1{position:absolute;left:40px;bottom:180px;max-width:640px;margin:0;
+    font:400 clamp(38px,5.5vw,68px)/1.05 'Playfair Display',serif;letter-spacing:-.02em}
+  h1 em{font-style:italic;background:linear-gradient(135deg,#fbbf24,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{position:absolute;left:40px;bottom:120px;max-width:520px;color:#8b97a6;font-size:15px;line-height:1.55}
+  .stats{position:absolute;right:40px;bottom:80px;text-align:right;font-family:ui-monospace,monospace;font-size:12px}
+  .stats .row{margin-top:6px;color:#8b97a6}
+  .stats .val{color:#fbbf24;font-weight:700}
+  .caption{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    color:#5b6674;font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <div class="brand">KAALI <span>·</span> SUDARSHANA CHAKRA</div>
+  <h1>One spinning disc.<br><em>Every threat cut.</em></h1>
+  <p class="sub">A 108-spoked cosmic chakra rotates at request-time speed. Nothing that approaches the core survives the wheel.</p>
+  <div class="stats">
+    <div class="row">requests processed <span class="val" id="reqs">0</span></div>
+    <div class="row">threats sliced <span class="val" id="killed">0</span></div>
+    <div class="row">spin <span class="val">108 rpm</span></div>
+  </div>
+  <div class="caption">Kaali #2 · Sudarshana Chakra</div>
+</div>
+<script>
+const cv=document.getElementById('c'),ct=cv.getContext('2d');
+let W,H,DPR;
+function fit(){DPR=devicePixelRatio||1;W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+fit();addEventListener('resize',fit);
+
+const threats=[];let killed=0,reqs=0;
+function spawn(){
+  const a=Math.random()*Math.PI*2;
+  const r=Math.min(W,H)*0.5;
+  const isBad=Math.random()<0.35;
+  threats.push({
+    x:Math.cos(a)*r,y:Math.sin(a)*r,
+    vx:-Math.cos(a)*(2+Math.random()*2)*DPR,vy:-Math.sin(a)*(2+Math.random()*2)*DPR,
+    bad:isBad,dead:false,flash:0,size:isBad?4:2
+  });
+  reqs++;
+}
+setInterval(spawn,90);
+
+function frame(t){
+  ct.fillStyle='rgba(5,7,16,.32)';ct.fillRect(0,0,W,H);
+  ct.save();ct.translate(W/2,H/2);
+
+  const CHAKRA_R=Math.min(W,H)*0.22;
+  const rot=t*0.0018;
+
+  // Chakra glow
+  const glow=ct.createRadialGradient(0,0,CHAKRA_R*0.3,0,0,CHAKRA_R*1.8);
+  glow.addColorStop(0,'rgba(251,191,36,0.35)');
+  glow.addColorStop(0.5,'rgba(249,115,22,0.15)');
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  ct.fillStyle=glow;ct.beginPath();ct.arc(0,0,CHAKRA_R*1.8,0,Math.PI*2);ct.fill();
+
+  // 108 spokes (rotating)
+  ct.save();ct.rotate(rot);
+  ct.strokeStyle='rgba(251,191,36,0.7)';ct.lineWidth=1*DPR;
+  for(let i=0;i<108;i++){
+    const a=i/108*Math.PI*2;
+    ct.beginPath();
+    ct.moveTo(Math.cos(a)*CHAKRA_R*0.25,Math.sin(a)*CHAKRA_R*0.25);
+    ct.lineTo(Math.cos(a)*CHAKRA_R,Math.sin(a)*CHAKRA_R);
+    ct.stroke();
+  }
+  // Outer ring
+  ct.strokeStyle='rgba(251,191,36,0.9)';ct.lineWidth=2.5*DPR;
+  ct.beginPath();ct.arc(0,0,CHAKRA_R,0,Math.PI*2);ct.stroke();
+  // Inner core disc
+  ct.fillStyle='rgba(251,191,36,0.15)';
+  ct.beginPath();ct.arc(0,0,CHAKRA_R*0.25,0,Math.PI*2);ct.fill();
+  // Center jewel
+  const jewel=ct.createRadialGradient(0,0,0,0,0,CHAKRA_R*0.15);
+  jewel.addColorStop(0,'#fff');jewel.addColorStop(1,'rgba(251,191,36,0)');
+  ct.fillStyle=jewel;
+  ct.beginPath();ct.arc(0,0,CHAKRA_R*0.15,0,Math.PI*2);ct.fill();
+  // Blade edges — 12 outer points
+  ct.fillStyle='rgba(251,191,36,0.8)';
+  for(let i=0;i<12;i++){
+    const a=i/12*Math.PI*2;
+    ct.save();ct.rotate(a);
+    ct.beginPath();
+    ct.moveTo(CHAKRA_R,0);
+    ct.lineTo(CHAKRA_R+15*DPR,-4*DPR);
+    ct.lineTo(CHAKRA_R+15*DPR,4*DPR);
+    ct.closePath();ct.fill();
+    ct.restore();
+  }
+  ct.restore();
+
+  // Threats moving toward center
+  for(let i=threats.length-1;i>=0;i--){
+    const th=threats[i];
+    if(th.dead){
+      th.flash*=0.88;
+      if(th.flash<0.02){threats.splice(i,1);continue;}
+      const g=ct.createRadialGradient(th.x,th.y,0,th.x,th.y,40*DPR*th.flash);
+      g.addColorStop(0,`rgba(251,191,36,${th.flash})`);g.addColorStop(1,'rgba(251,191,36,0)');
+      ct.fillStyle=g;ct.beginPath();ct.arc(th.x,th.y,40*DPR,0,Math.PI*2);ct.fill();
+      continue;
+    }
+    th.x+=th.vx;th.y+=th.vy;
+    const d=Math.hypot(th.x,th.y);
+    // Hit the chakra?
+    if(d<CHAKRA_R){
+      if(th.bad){th.dead=true;th.flash=1;killed++;}
+      else{
+        // Legit request — pass through with green pulse
+        threats.splice(i,1);continue;
+      }
+    }
+    // Off-screen cleanup
+    if(d>Math.min(W,H)*0.7){threats.splice(i,1);continue;}
+    // Draw threat
+    if(th.bad){
+      ct.fillStyle='rgba(248,113,113,0.9)';
+      ct.beginPath();ct.arc(th.x,th.y,th.size*DPR,0,Math.PI*2);ct.fill();
+      ct.strokeStyle='rgba(248,113,113,0.35)';ct.lineWidth=1.5*DPR;
+      ct.beginPath();ct.moveTo(th.x,th.y);ct.lineTo(th.x+th.vx*4,th.y+th.vy*4);ct.stroke();
+    }else{
+      ct.fillStyle='rgba(94,234,212,0.6)';
+      ct.beginPath();ct.arc(th.x,th.y,th.size*DPR,0,Math.PI*2);ct.fill();
+    }
+  }
+  ct.restore();
+
+  document.getElementById('killed').textContent=killed.toLocaleString();
+  document.getElementById('reqs').textContent=reqs.toLocaleString();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>

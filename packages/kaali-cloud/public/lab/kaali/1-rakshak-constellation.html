@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaali #1 — Rakshak Constellation</title>
+<style>
+  body{margin:0;background:#050710;color:#e6edf3;font-family:Inter,-apple-system,system-ui,sans-serif;overflow:hidden;height:100vh}
+  #c{position:fixed;inset:0;display:block}
+  .ui{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .brand{position:absolute;top:32px;left:40px;font-size:12px;letter-spacing:.42em;font-weight:600;text-transform:uppercase;opacity:.9}
+  .brand span{color:#5eead4}
+  h1{position:absolute;left:40px;bottom:180px;max-width:640px;margin:0;
+    font:400 clamp(38px,5.5vw,68px)/1.05 'Playfair Display',serif;letter-spacing:-.02em}
+  h1 em{font-style:italic;background:linear-gradient(135deg,#5eead4,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{position:absolute;left:40px;bottom:120px;max-width:520px;color:#8b97a6;font-size:15px;line-height:1.55}
+  .stats{position:absolute;right:40px;bottom:80px;text-align:right;font-family:ui-monospace,monospace;font-size:12px}
+  .stats .row{margin-top:6px;color:#8b97a6}
+  .stats .val{color:#5eead4;font-weight:700}
+  .caption{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    color:#5b6674;font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <div class="brand">KAALI <span>·</span> RAKSHAK CONSTELLATION</div>
+  <h1>The constellation <em>watches.</em><br>Threats vanish.</h1>
+  <p class="sub">A live network of 108 guardian stars. Every threat that touches its perimeter is caught, marked, and destroyed before it reaches your app.</p>
+  <div class="stats">
+    <div class="row">threats destroyed <span class="val" id="killed">0</span></div>
+    <div class="row">nodes active <span class="val" id="nodes">108</span></div>
+    <div class="row">latency <span class="val">1.9µs</span></div>
+  </div>
+  <div class="caption">Kaali #1 · Rakshak Constellation</div>
+</div>
+<script>
+const cv=document.getElementById('c'),ct=cv.getContext('2d');
+let W,H,DPR;
+function fit(){DPR=devicePixelRatio||1;W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+fit();addEventListener('resize',fit);
+
+const N=108,CX=()=>W/2,CY=()=>H/2;
+const stars=Array.from({length:N},(_,i)=>{
+  const a=i/N*Math.PI*2;const r=Math.min(W,H)*0.28+Math.random()*Math.min(W,H)*0.06;
+  return {a,r,cx:Math.cos(a)*r,cy:Math.sin(a)*r,pulse:Math.random(),jitter:Math.random()*2}
+});
+
+const threats=[];let killed=0;
+function spawn(){
+  const a=Math.random()*Math.PI*2;
+  const r=Math.min(W,H)*0.6;
+  threats.push({x:Math.cos(a)*r,y:Math.sin(a)*r,vx:-Math.cos(a)*3*DPR,vy:-Math.sin(a)*3*DPR,life:1,dead:false});
+}
+setInterval(spawn,180);
+
+function frame(t){
+  ct.fillStyle='rgba(5,7,16,.35)';ct.fillRect(0,0,W,H);
+  ct.save();ct.translate(CX(),CY());
+
+  // Central Kaali core (protected)
+  const R=Math.min(W,H)*0.06;
+  const grd=ct.createRadialGradient(0,0,0,0,0,R*2);
+  grd.addColorStop(0,'rgba(94,234,212,0.9)');grd.addColorStop(1,'rgba(56,189,248,0)');
+  ct.fillStyle=grd;ct.beginPath();ct.arc(0,0,R*2,0,Math.PI*2);ct.fill();
+
+  // Stars (constellation guardians)
+  stars.forEach((s,i)=>{
+    const p=Math.sin(t/700+s.pulse*Math.PI*2)*.5+.5;
+    const R2=Math.min(W,H)*0.28;
+    // Occasional attack response ripple: brighten if threat near
+    let brightness=0.5+p*0.5;
+    threats.forEach(th=>{
+      const d=Math.hypot(th.x-s.cx,th.y-s.cy);
+      if(d<60*DPR&&!th.dead)brightness=1;
+    });
+    ct.fillStyle=`rgba(94,234,212,${brightness})`;
+    ct.beginPath();ct.arc(s.cx,s.cy,2*DPR+p*1.5*DPR,0,Math.PI*2);ct.fill();
+  });
+
+  // Connection lines when close pairs — mandala mesh
+  ct.strokeStyle='rgba(94,234,212,0.08)';ct.lineWidth=.6*DPR;
+  for(let i=0;i<N;i++){
+    for(let j=i+1;j<i+8&&j<N;j++){
+      const a=stars[i],b=stars[j];
+      ct.beginPath();ct.moveTo(a.cx,a.cy);ct.lineTo(b.cx,b.cy);ct.stroke();
+    }
+  }
+
+  // Threats — inbound
+  threats.forEach(th=>{
+    if(th.dead)return;
+    th.x+=th.vx;th.y+=th.vy;
+    const d=Math.hypot(th.x,th.y);
+    // Hit the constellation perimeter?
+    if(d<Math.min(W,H)*0.30){
+      th.dead=true;killed++;
+      // Explosion — set flash
+      th.flash=1;
+    }
+    ct.fillStyle=`rgba(248,113,113,${th.life})`;
+    ct.beginPath();ct.arc(th.x,th.y,3*DPR,0,Math.PI*2);ct.fill();
+    // Red trail
+    ct.strokeStyle='rgba(248,113,113,0.3)';ct.lineWidth=1.5*DPR;
+    ct.beginPath();ct.moveTo(th.x,th.y);ct.lineTo(th.x+th.vx*5,th.y+th.vy*5);ct.stroke();
+  });
+
+  // Draw explosion flashes for killed
+  threats.forEach(th=>{
+    if(!th.dead)return;
+    th.flash*=0.9;
+    if(th.flash<0.02){th.remove=true;return;}
+    const gg=ct.createRadialGradient(th.x,th.y,0,th.x,th.y,30*DPR*th.flash);
+    gg.addColorStop(0,`rgba(94,234,212,${th.flash})`);gg.addColorStop(1,'rgba(94,234,212,0)');
+    ct.fillStyle=gg;ct.beginPath();ct.arc(th.x,th.y,30*DPR,0,Math.PI*2);ct.fill();
+  });
+  // Cleanup
+  for(let i=threats.length-1;i>=0;i--)if(threats[i].remove)threats.splice(i,1);
+
+  ct.restore();
+
+  document.getElementById('killed').textContent=killed.toLocaleString();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>

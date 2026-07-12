@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaali #4 — Nakshatra Ward</title>
+<style>
+  body{margin:0;background:#050710;color:#e6edf3;font-family:Inter,-apple-system,system-ui,sans-serif;overflow:hidden;height:100vh}
+  #c{position:fixed;inset:0;display:block}
+  .ui{position:fixed;inset:0;pointer-events:none;z-index:5}
+  .brand{position:absolute;top:32px;left:40px;font-size:12px;letter-spacing:.42em;font-weight:600;text-transform:uppercase;opacity:.9}
+  .brand span{color:#38bdf8}
+  h1{position:absolute;left:40px;bottom:180px;max-width:640px;margin:0;
+    font:400 clamp(38px,5.5vw,68px)/1.05 'Playfair Display',serif;letter-spacing:-.02em}
+  h1 em{font-style:italic;background:linear-gradient(135deg,#38bdf8,#5eead4);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{position:absolute;left:40px;bottom:120px;max-width:520px;color:#8b97a6;font-size:15px;line-height:1.55}
+  .stats{position:absolute;right:40px;bottom:80px;text-align:right;font-family:ui-monospace,monospace;font-size:12px}
+  .stats .row{margin-top:6px;color:#8b97a6}
+  .stats .val{color:#38bdf8;font-weight:700}
+  .caption{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+    color:#5b6674;font-size:11px;letter-spacing:.3em;text-transform:uppercase}
+</style></head>
+<body>
+<canvas id="c"></canvas>
+<div class="ui">
+  <div class="brand">KAALI <span>·</span> NAKSHATRA WARD</div>
+  <h1>27 guardians.<br><em>One shared mind.</em></h1>
+  <p class="sub">27 Nakshatras form a live perimeter around your model. Whenever one detects an attack, the whole circle lights up — the network responds as one.</p>
+  <div class="stats">
+    <div class="row">nakshatras active <span class="val">27/27</span></div>
+    <div class="row">alerts fired <span class="val" id="alerts">0</span></div>
+    <div class="row">consensus <span class="val">Byzantine</span></div>
+  </div>
+  <div class="caption">Kaali #4 · Nakshatra Ward</div>
+</div>
+<script>
+const cv=document.getElementById('c'),ct=cv.getContext('2d');
+let W,H,DPR;
+function fit(){DPR=devicePixelRatio||1;W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px'}
+fit();addEventListener('resize',fit);
+
+const N=27;
+const colors=['#fbbf24','#f472b6','#a78bfa','#38bdf8','#5eead4','#fb923c','#f87171'];
+const nakshatras=Array.from({length:N},(_,i)=>{
+  const a=(i/N-0.25)*Math.PI*2;
+  return {a,alert:0,i,color:colors[i%colors.length]};
+});
+
+const threats=[];let alerts=0;
+function spawn(){
+  const a=Math.random()*Math.PI*2;
+  const r=Math.min(W,H)*0.55;
+  threats.push({x:Math.cos(a)*r,y:Math.sin(a)*r,vx:-Math.cos(a)*3*DPR,vy:-Math.sin(a)*3*DPR,dead:false,flash:0});
+}
+setInterval(spawn,300);
+
+function frame(t){
+  ct.fillStyle='rgba(5,7,16,.30)';ct.fillRect(0,0,W,H);
+  ct.save();ct.translate(W/2,H/2);
+
+  const R=Math.min(W,H)*0.30;
+  const rot=t*0.00015;
+
+  // Outer ring — the ecliptic
+  ct.strokeStyle='rgba(56,189,248,0.15)';ct.lineWidth=1*DPR;
+  ct.beginPath();ct.arc(0,0,R,0,Math.PI*2);ct.stroke();
+  ct.strokeStyle='rgba(56,189,248,0.08)';
+  ct.beginPath();ct.arc(0,0,R*1.08,0,Math.PI*2);ct.stroke();
+
+  // Alerted-Nakshatras illuminate all others via lines
+  const alertedIdx=nakshatras.map((n,i)=>n.alert>0.1?i:-1).filter(i=>i>=0);
+
+  // Threats moving in
+  threats.forEach(th=>{
+    if(th.dead){
+      th.flash*=0.9;
+      if(th.flash<0.02)th.remove=true;
+      const g=ct.createRadialGradient(th.x,th.y,0,th.x,th.y,50*DPR*th.flash);
+      g.addColorStop(0,`rgba(56,189,248,${th.flash})`);g.addColorStop(1,'rgba(56,189,248,0)');
+      ct.fillStyle=g;ct.beginPath();ct.arc(th.x,th.y,50*DPR,0,Math.PI*2);ct.fill();
+      return;
+    }
+    th.x+=th.vx;th.y+=th.vy;
+    const d=Math.hypot(th.x,th.y);
+    if(d<R*1.02){
+      th.dead=true;th.flash=1;alerts++;
+      // Find nearest Nakshatra angle
+      const thA=Math.atan2(th.y,th.x);
+      const idx=Math.round((thA/(Math.PI*2)+0.25)*N+N)%N;
+      nakshatras[idx].alert=1;
+    }
+    ct.fillStyle='rgba(248,113,113,0.9)';
+    ct.beginPath();ct.arc(th.x,th.y,3*DPR,0,Math.PI*2);ct.fill();
+    ct.strokeStyle='rgba(248,113,113,0.4)';ct.lineWidth=1.4*DPR;
+    ct.beginPath();ct.moveTo(th.x,th.y);ct.lineTo(th.x+th.vx*4,th.y+th.vy*4);ct.stroke();
+  });
+  for(let i=threats.length-1;i>=0;i--)if(threats[i].remove)threats.splice(i,1);
+
+  // Alerted network — connect ALL Nakshatras when any is alerted
+  if(alertedIdx.length){
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const a=nakshatras[i],b=nakshatras[j];
+        const ax=Math.cos(a.a+rot)*R,ay=Math.sin(a.a+rot)*R;
+        const bx=Math.cos(b.a+rot)*R,by=Math.sin(b.a+rot)*R;
+        const intensity=Math.max(...alertedIdx.map(k=>nakshatras[k].alert))*0.35;
+        ct.strokeStyle=`rgba(94,234,212,${intensity*0.5})`;
+        ct.lineWidth=0.6*DPR;
+        ct.beginPath();ct.moveTo(ax,ay);ct.lineTo(bx,by);ct.stroke();
+      }
+    }
+  }
+
+  // Draw Nakshatras
+  nakshatras.forEach((n,i)=>{
+    const a=n.a+rot;
+    const x=Math.cos(a)*R,y=Math.sin(a)*R;
+    const pulse=Math.sin(t/700+i)*.3+.7;
+    // Halo
+    if(n.alert>0.05){
+      const g=ct.createRadialGradient(x,y,0,x,y,18*DPR);
+      g.addColorStop(0,`rgba(94,234,212,${n.alert})`);g.addColorStop(1,'rgba(94,234,212,0)');
+      ct.fillStyle=g;ct.beginPath();ct.arc(x,y,18*DPR,0,Math.PI*2);ct.fill();
+      n.alert*=0.965;
+    }else{
+      const g=ct.createRadialGradient(x,y,0,x,y,10*DPR);
+      g.addColorStop(0,n.color+'aa');g.addColorStop(1,n.color+'00');
+      ct.fillStyle=g;ct.beginPath();ct.arc(x,y,10*DPR,0,Math.PI*2);ct.fill();
+    }
+    // Star core
+    ct.fillStyle=n.color;
+    ct.beginPath();ct.arc(x,y,3.2*DPR*pulse,0,Math.PI*2);ct.fill();
+  });
+
+  // Central protected core
+  const cg=ct.createRadialGradient(0,0,0,0,0,R*0.15);
+  cg.addColorStop(0,'rgba(94,234,212,0.5)');cg.addColorStop(1,'rgba(56,189,248,0)');
+  ct.fillStyle=cg;ct.beginPath();ct.arc(0,0,R*0.15,0,Math.PI*2);ct.fill();
+  ct.strokeStyle='rgba(94,234,212,0.4)';ct.lineWidth=1*DPR;
+  ct.beginPath();ct.arc(0,0,R*0.06,0,Math.PI*2);ct.stroke();
+
+  ct.restore();
+
+  document.getElementById('alerts').textContent=alerts.toLocaleString();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script></body></html>
