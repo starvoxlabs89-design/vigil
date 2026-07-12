@@ -114,10 +114,10 @@
   .hero-quote strong{color:var(--text);font-style:normal;font-weight:600}
   .hero-cta{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
 
-  /* --- Rakshak Constellation live guardian net (black theme, high-life) --- */
-  .rakshak-hero{position:relative;width:min(920px,96vw);aspect-ratio:1;margin:32px auto 0}
+  /* --- Kaali Black Hole — Interstellar-inspired singularity + accretion disc --- */
+  .rakshak-hero{position:relative;width:min(1200px,100vw);aspect-ratio:16/10;margin:24px auto 0}
   #rakshak{position:absolute;inset:0;width:100%;height:100%;display:block;
-    filter:drop-shadow(0 0 60px rgba(94,234,212,.4))}
+    filter:drop-shadow(0 0 80px rgba(94,234,212,.35))}
   /* Radiant light beams from behind the figure */
   .beams{position:absolute;inset:0;pointer-events:none;
     background:conic-gradient(from 0deg,
@@ -527,7 +527,189 @@ const io = new IntersectionObserver(entries => {
 }, {rootMargin:'0px 0px -10% 0px', threshold:.05});
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-// --- Rakshak Constellation — live guardian net (black theme, high-life) ---
+// --- Kaali Black Hole — accretion-disc singularity that destroys threats ---
+// Interstellar-inspired: event horizon, tilted accretion disc of spiraling
+// light streaks, ambient starfield, red threats that spiral into the void.
+(function initBlackHole(){
+  const cv = document.getElementById('rakshak');
+  if (!cv) return;
+  const ct = cv.getContext('2d');
+  let W = 0, H = 0, DPR = 1;
+  const parent = cv.parentElement;
+
+  const NUM_STREAKS = 900;
+  const streaks = [];
+  for (let i = 0; i < NUM_STREAKS; i++) {
+    streaks.push({
+      theta: Math.random() * Math.PI * 2,
+      r:     0.05 + Math.random() * 0.95,
+      speed: 0.35 + Math.random() * 0.75,
+      len:   0.03 + Math.random() * 0.09,
+      bright:0.35 + Math.random() * 0.65,
+    });
+  }
+
+  let stars = [];
+  function initField(){
+    stars = [];
+    for (let i = 0; i < 260; i++) {
+      stars.push({
+        x: (Math.random() - 0.5) * W * 1.1,
+        y: (Math.random() - 0.5) * H * 1.1,
+        r: (Math.random() * 1.2 + 0.3) * DPR,
+        warm: Math.random() > 0.92,
+        p: Math.random(),
+      });
+    }
+  }
+
+  function fit(){
+    DPR = window.devicePixelRatio || 1;
+    const r = parent.getBoundingClientRect();
+    cv.width  = W = Math.max(1, Math.floor(r.width  * DPR));
+    cv.height = H = Math.max(1, Math.floor(r.height * DPR));
+    initField();
+  }
+  const ro = new ResizeObserver(fit); ro.observe(parent);
+  fit();
+
+  const threats = [];
+  function spawn(){
+    if (document.hidden) return;
+    const side = Math.random();
+    let x, y;
+    if (side < 0.25)      { x = -W*0.45; y = (Math.random() - 0.5) * H * 0.6; }
+    else if (side < 0.5)  { x =  W*0.45; y = (Math.random() - 0.5) * H * 0.6; }
+    else if (side < 0.75) { x = (Math.random() - 0.5) * W * 0.9; y = -H*0.45; }
+    else                  { x = (Math.random() - 0.5) * W * 0.9; y =  H*0.45; }
+    threats.push({ x, y, vx: 0, vy: 0, life: 1 });
+  }
+  setInterval(spawn, 700);
+
+  let raf;
+  function frame(t){
+    // Slight motion-blur trail
+    ct.fillStyle = 'rgba(0,0,0,0.22)';
+    ct.fillRect(0, 0, W, H);
+    ct.save();
+    ct.translate(W / 2, H / 2);
+
+    const SCALE       = Math.min(W, H);
+    const HORIZON_R   = SCALE * 0.10;
+    const TILT        = 0.30;                     // Y-flatten factor
+    const DISC_RIM    = SCALE * 0.13;             // inner disc radius
+    const DISC_OUT    = SCALE * 0.60;             // outer disc radius
+    const DISC_RANGE  = DISC_OUT - DISC_RIM;
+
+    // 1) Ambient starfield
+    for (const s of stars) {
+      const tw = 0.55 + Math.sin(t / 800 + s.p * 10) * 0.35;
+      if (s.warm) {
+        const R = 255, G = 180 + Math.floor(60 * tw), B = 140 + Math.floor(40 * tw);
+        ct.fillStyle = 'rgba(' + R + ',' + G + ',' + B + ',' + tw.toFixed(3) + ')';
+      } else {
+        ct.fillStyle = 'rgba(220,235,255,' + (0.35 + tw * 0.5).toFixed(3) + ')';
+      }
+      ct.fillRect(s.x, s.y, s.r, s.r);
+    }
+
+    // Streak renderer (inline, no closure issues) — draws a short arc trail
+    function paintStreak(s, r) {
+      const ta = s.theta, tb = s.theta - s.len;
+      const ax = Math.cos(ta) * r, ay = Math.sin(ta) * r * TILT;
+      const bx = Math.cos(tb) * r, by = Math.sin(tb) * r * TILT;
+      const glow = Math.max(0, 1 - (r - DISC_RIM) / DISC_RANGE);   // 1 near horizon, 0 far
+      const alpha = Math.min(1, s.bright * (0.28 + glow * 0.85));
+      // White-hot near horizon, teal-blue outward
+      let R, G, B;
+      if (glow > 0.55)      { R = 255; G = 255; B = 250; }
+      else if (glow > 0.30) { R = 210; G = 245; B = 255; }
+      else                  { R = 130; G = 210; B = 240; }
+      ct.strokeStyle = 'rgba(' + R + ',' + G + ',' + B + ',' + alpha.toFixed(3) + ')';
+      ct.lineWidth = (0.6 + glow * 1.6) * DPR;
+      ct.beginPath();
+      ct.moveTo(ax, ay);
+      ct.quadraticCurveTo((ax+bx)/2 + (ay+by)*0.06, (ay+by)/2 - (ax+bx)*0.06, bx, by);
+      ct.stroke();
+    }
+
+    // 2) Advance & draw BACK half of the disc (streaks currently behind the horizon)
+    ct.globalCompositeOperation = 'lighter';
+    for (const s of streaks) {
+      s.theta += (0.006 * s.speed) / Math.sqrt(s.r);   // Keplerian-ish speed
+      const r = DISC_RIM + s.r * DISC_RANGE;
+      const yFlat = Math.sin(s.theta) * r * TILT;
+      if (yFlat < 0) paintStreak(s, r);
+    }
+    ct.globalCompositeOperation = 'source-over';
+
+    // 3) Event horizon: rim glow + pure-black disc
+    const rimGrd = ct.createRadialGradient(0, 0, HORIZON_R * 0.9, 0, 0, HORIZON_R * 1.5);
+    rimGrd.addColorStop(0.0, 'rgba(255,255,255,0.9)');
+    rimGrd.addColorStop(0.3, 'rgba(94,234,212,0.75)');
+    rimGrd.addColorStop(0.7, 'rgba(56,189,248,0.28)');
+    rimGrd.addColorStop(1.0, 'rgba(56,189,248,0)');
+    ct.fillStyle = rimGrd;
+    ct.beginPath(); ct.arc(0, 0, HORIZON_R * 1.5, 0, Math.PI * 2); ct.fill();
+
+    ct.fillStyle = '#000';
+    ct.beginPath();
+    ct.ellipse(0, 0, HORIZON_R, HORIZON_R * 0.98, 0, 0, Math.PI * 2);
+    ct.fill();
+
+    // 4) FRONT half of the disc (in front of horizon)
+    ct.globalCompositeOperation = 'lighter';
+    for (const s of streaks) {
+      const r = DISC_RIM + s.r * DISC_RANGE;
+      const yFlat = Math.sin(s.theta) * r * TILT;
+      if (yFlat >= 0) paintStreak(s, r);
+    }
+    ct.globalCompositeOperation = 'source-over';
+
+    // 5) Threats spiral inward under gravity, vanish at horizon
+    for (let i = threats.length - 1; i >= 0; i--) {
+      const th = threats[i];
+      const d = Math.hypot(th.x, th.y);
+      if (d < HORIZON_R * 0.85) {
+        const g = ct.createRadialGradient(th.x, th.y, 0, th.x, th.y, 50 * DPR * th.life);
+        g.addColorStop(0, 'rgba(255,200,120,' + th.life.toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(255,200,120,0)');
+        ct.fillStyle = g;
+        ct.beginPath(); ct.arc(th.x, th.y, 50 * DPR, 0, Math.PI * 2); ct.fill();
+        th.life *= 0.75;
+        if (th.life < 0.05) threats.splice(i, 1);
+        continue;
+      }
+      const nx = -th.x / d, ny = -th.y / d;
+      const pull = 800 / (d * d + 200);
+      th.vx += (nx - ny * 0.4) * pull * DPR;
+      th.vy += (ny + nx * 0.4) * pull * DPR;
+      th.vx *= 0.994; th.vy *= 0.994;
+      th.x += th.vx; th.y += th.vy;
+      ct.strokeStyle = 'rgba(248,113,113,0.55)';
+      ct.lineWidth = 1.4 * DPR;
+      ct.beginPath();
+      ct.moveTo(th.x, th.y);
+      ct.lineTo(th.x - th.vx * 4, th.y - th.vy * 4);
+      ct.stroke();
+      ct.fillStyle = 'rgba(255,120,120,0.95)';
+      ct.beginPath(); ct.arc(th.x, th.y, 2.6 * DPR, 0, Math.PI * 2); ct.fill();
+    }
+
+    ct.restore();
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(raf);
+    else raf = requestAnimationFrame(frame);
+  });
+})();
+
+// Legacy Rakshak (disabled — kept commented for quick swap-back):
+/*
+(function initRakshak(){
 // 108 guardian stars form a rotating protective perimeter around the Kaali core.
 // Threats get intercepted with energy zaps + expanding shockwaves.
 // Rotating chakra spokes + counter-rotating inner ring + ambient particles +
@@ -803,6 +985,7 @@ document.querySelectorAll('.reveal').forEach(el => io.observe(el));
     else raf = requestAnimationFrame(frame);
   });
 })();
+*/
 
 // --- Live scan (calls /scan if signed in, else calls a client-side content check) ---
 const $ = id => document.getElementById(id);
