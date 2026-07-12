@@ -7,7 +7,7 @@ import { q, qOne } from "./db.js";
 import { randomToken, hashToken } from "./tokens.js";
 import { json, parseCookies, setCookie, clientIp } from "./util.js";
 import { limit } from "./ratelimit.js";
-import { sendEmail } from "./email.js";
+import { sendEmail, welcomeEmailTemplate } from "./email.js";
 
 const POLICY_VERSION = "v1-2026-07";
 const SESSION_DAYS = 30;
@@ -202,12 +202,10 @@ async function upsertIdentity(providerName, u, req) {
     [newUser.id, `signup_${providerName}`, POLICY_VERSION, ip, ua],
   );
   await q("INSERT INTO auth_events(email, ip, kind) VALUES($1,$2,$3)", [u.email, ip, `signup_${providerName}`]);
-  // Optional welcome — best-effort.
+  // Optional welcome — best-effort, branded template.
   sendEmail({
     to: u.email,
-    subject: "Welcome to Kaali",
-    text: `Your Kaali account is ready. Sign in any time at ${dashUrl()}`,
-    html: `<p>Your <strong>Kaali</strong> account is ready.</p><p><a href="${dashUrl()}">Open dashboard</a></p>`,
+    ...welcomeEmailTemplate({ dashboardUrl: dashUrl() }),
   }).catch(() => {});
   return newUser.id;
 }
