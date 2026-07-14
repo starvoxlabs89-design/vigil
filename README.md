@@ -75,7 +75,7 @@ The first wave of AI-security tools (Protect AI, Lakera, CalypsoAI) got acquired
 
 - 🆓 **Free & MIT-licensed.** The scanner runs locally, no account, no data leaves your machine.
 - ⚡ **Zero-dependency.** Pure Node ≥20. Clone and run.
-- 🇮🇳 **DPDP-aware for the AI layer.** Catches Aadhaar/PAN leaking through your **code, logs, LLM responses, and agent traffic** — the surface data-at-rest scanners never look at — and maps it to DPDP obligations.
+- 🇮🇳 **DPDP-aware for the AI layer.** Catches Aadhaar/PAN leaking through your **code, logs, LLM responses, and agent traffic** — the surface data-at-rest scanners never look at — and maps it to DPDP obligations. Mappings live in the [India Compliance Kit](https://github.com/starvoxlabs89-design/india-compliance-kit).
 - 🔌 **CI/CD-ready.** `--json` + `--fail-on` for pipelines.
 
 > **Kaali Cloud** (coming soon) wraps this engine in 24/7 continuous monitoring, historical trends, alerting, and the **DPDP / ISO-42001 evidence report** your auditor accepts. See [SPEC.md](SPEC.md).
