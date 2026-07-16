@@ -12,10 +12,14 @@ set -euo pipefail
 REPO_URL="${REPO_URL:-https://github.com/starvoxlabs89-design/kaali.git}"
 INSTALL_DIR="${INSTALL_DIR:-/opt/kaali}"
 SVC_USER="${SVC_USER:-kaali}"
+PRIMARY_HOST="${PRIMARY_HOST:-kaali.io}"          # apex — landing + app + OAuth base
 API_HOST="${API_HOST:-api.kaali.io}"
 APP_HOST="${APP_HOST:-app.kaali.io}"
 DB_NAME="${DB_NAME:-kaali}"
 DB_USER="${DB_USER:-kaali}"
+# All four hosts share one cert; kaali.io FIRST so the lineage is /live/kaali.io/.
+CERT_HOSTS=(-d "$PRIMARY_HOST" -d "www.$PRIMARY_HOST" -d "$APP_HOST" -d "$API_HOST")
+CERT_DIR="/etc/letsencrypt/live/$PRIMARY_HOST"
 
 step() { printf "\n\033[1;36m➤ %s\033[0m\n" "$*"; }
 have() { command -v "$1" >/dev/null 2>&1; }
@@ -83,18 +87,22 @@ if [[ ! -f "$APP_DIR/.env" ]]; then
   DB_PASS_VAL=${DB_PASS_LINE#DB_PASS=}
   cat > "$APP_DIR/.env" <<EOF
 PORT=4842
-PUBLIC_URL=https://$API_HOST
-DASHBOARD_URL=https://$APP_HOST
+PUBLIC_URL=https://$PRIMARY_HOST
+DASHBOARD_URL=https://$PRIMARY_HOST
 DATABASE_URL=postgres://$DB_USER:$DB_PASS_VAL@127.0.0.1:5432/$DB_NAME
 SESSION_SECRET=$(openssl rand -hex 32)
 CSRF_SECRET=$(openssl rand -hex 32)
 COOKIE_SECURE=1
 
 # Fill these before restart:
+# Seeds the first admin account on boot (use your email):
+KAALI_BOOTSTRAP_ADMIN_EMAIL=
 RESEND_API_KEY=
-EMAIL_FROM=Kaali <noreply@$API_HOST>
+EMAIL_FROM=Kaali <noreply@$PRIMARY_HOST>
+# OAuth redirect URI to register: https://$PRIMARY_HOST/auth/google/callback
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+# OAuth redirect URI to register: https://$PRIMARY_HOST/auth/meta/callback
 META_APP_ID=
 META_APP_SECRET=
 EOF
@@ -111,15 +119,35 @@ sed "s|/opt/kaali/kaali-cloud|$APP_DIR|g" "$APP_DIR/deploy/kaali-cloud.service" 
 systemctl daemon-reload
 systemctl enable kaali-cloud >/dev/null
 
-# --- 6. nginx ----------------------------------------------------------------
-step "Installing nginx site"
-sed -e "s|api.kaali.io|$API_HOST|g" -e "s|app.kaali.io|$APP_HOST|g" \
-  "$APP_DIR/deploy/nginx.conf" > /etc/nginx/sites-available/kaali.conf
-ln -sfn /etc/nginx/sites-available/kaali.conf /etc/nginx/sites-enabled/kaali.conf
-nginx -t
-systemctl reload nginx
+# --- 6. TLS certificate (MUST exist before the SSL nginx site can load) ------
+# The nginx site is SSL-only and references $CERT_DIR; if that cert is missing,
+# `nginx -t` fails. So obtain the cert FIRST (certonly, via the already-running
+# nginx — e.g. the box's existing vhost — to answer the ACME challenge).
+step "Obtaining TLS certificate for $PRIMARY_HOST (+ www/app/api)"
+if [[ -f "$CERT_DIR/fullchain.pem" ]]; then
+  echo "  → cert already present at $CERT_DIR"
+elif getent hosts "$PRIMARY_HOST" >/dev/null 2>&1; then
+  certbot certonly --nginx --non-interactive --agree-tos -m "hello@$PRIMARY_HOST" \
+    "${CERT_HOSTS[@]}" \
+    || echo "  ⚠ certbot failed — check DNS + port 80, then re-run this script."
+else
+  echo "  → DNS for $PRIMARY_HOST not resolving from this box yet; skipping cert."
+  echo "    Point DNS at this server, then re-run: sudo bash deploy/deploy.sh"
+fi
 
-# --- 7. Start ----------------------------------------------------------------
+# --- 7. nginx site -----------------------------------------------------------
+step "Installing nginx site"
+cp "$APP_DIR/deploy/nginx.conf" /etc/nginx/sites-available/kaali.conf
+ln -sfn /etc/nginx/sites-available/kaali.conf /etc/nginx/sites-enabled/kaali.conf
+if nginx -t 2>/dev/null; then
+  systemctl reload nginx
+  echo "  ✓ nginx reloaded — https://$PRIMARY_HOST is served"
+else
+  echo "  ⚠ nginx -t failed (usually: the TLS cert isn't present yet)."
+  echo "    Fix the cert (step 6), then: sudo nginx -t && sudo systemctl reload nginx"
+fi
+
+# --- 8. Start ----------------------------------------------------------------
 step "Starting kaali-cloud"
 systemctl restart kaali-cloud
 sleep 2
@@ -130,26 +158,20 @@ else
   exit 1
 fi
 
-# --- 8. TLS (optional, only if DNS resolves) ---------------------------------
-step "TLS (certbot). Requires DNS pointing to this box."
-if getent hosts "$API_HOST" >/dev/null 2>&1; then
-  certbot --nginx -d "$API_HOST" -d "$APP_HOST" --non-interactive --agree-tos \
-    -m "hello@$API_HOST" --redirect || echo "  certbot failed — you can rerun it later."
-else
-  echo "  → DNS for $API_HOST not resolving yet. After DNS propagates, run:"
-  echo "     sudo certbot --nginx -d $API_HOST -d $APP_HOST"
-fi
-
 # --- 9. Done -----------------------------------------------------------------
 cat <<EOF
 
-✅ Done.
+✅ Deploy complete. The landing is live now at https://$PRIMARY_HOST
 
-Next steps for you:
- 1. Edit  $APP_DIR/.env  and set RESEND_API_KEY, GOOGLE_CLIENT_ID/SECRET, META_APP_ID/SECRET.
- 2. Restart:  sudo systemctl restart kaali-cloud
- 3. Point DNS: $API_HOST + $APP_HOST → this VPS.
- 4. If not done: sudo certbot --nginx -d $API_HOST -d $APP_HOST
- 5. Test signup at:  https://$APP_HOST/
- 6. Watch logs:  sudo journalctl -u kaali-cloud -f
+To finish enabling sign-in (full Kaali Cloud), edit $APP_DIR/.env:
+  KAALI_BOOTSTRAP_ADMIN_EMAIL=you@domain.com     # seeds your admin account
+  GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET         # redirect: https://$PRIMARY_HOST/auth/google/callback
+  RESEND_API_KEY + EMAIL_FROM                      # for password signup / verification emails
+  (META_APP_ID / META_APP_SECRET optional)         # redirect: https://$PRIMARY_HOST/auth/meta/callback
+then:  sudo systemctl restart kaali-cloud
+
+Verify:
+  curl -sI https://$PRIMARY_HOST | head -1                 # expect 200
+  curl -s  https://$PRIMARY_HOST/auth/providers            # expect {"providers":[...]}
+  sudo journalctl -u kaali-cloud -f                        # watch logs
 EOF
