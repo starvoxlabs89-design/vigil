@@ -1,11 +1,11 @@
 {
   "name": "@kaali/sentinel",
   "version": "0.1.0",
-  "description": "Kaali Sentinel — zero-dependency Linux host compromise scanner. Detects backdoor users, rogue SSH keys, cron/systemd persistence, /tmp malware, SUID anomalies, and suspicious auth-log events. Reports to Kaali Cloud.",
+  "description": "Kaali Sentinel — zero-dependency Linux host compromise scanner. Detects backdoor users, rogue SSH keys, cron/systemd persistence, /tmp malware, SUID anomalies, over-privileged/malicious containers, and baseline drift (new users/keys/ports/units/containers since a known-good snapshot). Reports to Kaali Cloud.",
   "type": "module",
   "bin": { "kaali-sentinel": "host-scan.js" },
   "scripts": { "scan": "node host-scan.js" },
-  "keywords": ["security", "hids", "intrusion-detection", "linux", "backdoor", "compromise", "incident-response", "kaali"],
+  "keywords": ["security", "hids", "intrusion-detection", "linux", "backdoor", "compromise", "incident-response", "docker", "container-security", "baseline", "drift-detection", "kaali"],
   "license": "MIT",
   "engines": { "node": ">=18" },
   "files": ["host-scan.js", "deploy", "README.md"]

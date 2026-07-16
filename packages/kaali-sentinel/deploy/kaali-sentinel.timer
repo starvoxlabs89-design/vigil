@@ -2,7 +2,9 @@
 Description=Run Kaali Sentinel host scan every 30 minutes
 
 [Timer]
-OnBootSec=5min
+# Fire quickly after boot — a compromised host often re-establishes its
+# backdoor within a minute of reboot (as the pakchoi attacker did).
+OnBootSec=30s
 OnUnitActiveSec=30min
 Persistent=true
 

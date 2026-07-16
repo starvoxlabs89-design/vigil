@@ -5,14 +5,19 @@
  * Detects the classic Linux server-intrusion indicators: backdoor users
  * (e.g. a rogue "pakchoi" account with a hardcoded password), rogue SSH keys,
  * cron/systemd/rc persistence, malware running from /tmp|/dev/shm, unexpected
- * listeners, SUID anomalies, LD_PRELOAD rootkits, and suspicious auth.log events.
+ * listeners, SUID anomalies, LD_PRELOAD rootkits, suspicious auth.log events,
+ * over-privileged / malicious CONTAINERS (the amco_* docker-persistence class),
+ * and BASELINE DRIFT (anything security-relevant that appeared since a known-good
+ * snapshot — a new UID-0 user, SSH key, port, unit, or container).
  *
  * Zero dependencies. Linux-targeted. Run as root for full coverage:
  *
- *     sudo node host-scan.js                 # terminal report
- *     sudo node host-scan.js --json          # machine-readable
- *     sudo node host-scan.js --cloud-key K   # also POST to kaali.io/ingest
- *     sudo node host-scan.js --allow ./allow.json   # baseline allowlist
+ *     sudo node host-scan.js                       # terminal report
+ *     sudo node host-scan.js --json                # machine-readable
+ *     sudo node host-scan.js --cloud-key K         # also POST to kaali.io/ingest
+ *     sudo node host-scan.js --allow ./allow.json  # allowlist (silence known-good)
+ *     sudo node host-scan.js --save-baseline       # record today's state as known-good
+ *     sudo node host-scan.js --baseline PATH        # diff against a saved baseline
  *
  * Exit code: 2 if any critical/high finding, else 0.
  */
@@ -27,8 +32,13 @@ const opt = {
   cloudKey: val("--cloud-key"),
   cloudUrl: val("--cloud-url") || "https://kaali.io/ingest",
   allowPath: val("--allow"),
+  baselinePath: val("--baseline"),
+  saveBaseline: argv.includes("--save-baseline"),
 };
 function val(flag) { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : null; }
+// --save-baseline with no explicit path uses the default location.
+const DEFAULT_BASELINE = "/var/lib/kaali/baseline.json";
+if (opt.saveBaseline && !opt.baselinePath) opt.baselinePath = DEFAULT_BASELINE;
 
 // ---------- allowlist (baseline of known-good) ----------
 const DEFAULT_ALLOW = {
@@ -36,6 +46,8 @@ const DEFAULT_ALLOW = {
   ssh_key_fingerprints: [],  // SHA256:... fingerprints you recognise
   listen_ports: [22, 80, 443, 5432, 4842], // add your app ports
   systemd_units: [],         // extra unit names you run
+  containers: [],            // container names you deploy (e.g. "kaali-cloud")
+  container_images: [],      // image name-prefixes you trust (e.g. "ghcr.io/yourorg/")
 };
 let ALLOW = { ...DEFAULT_ALLOW };
 if (opt.allowPath) {
@@ -54,6 +66,19 @@ function finding(severity, title, detail, evidence, fix) {
 function sh(cmd) { try { return cp.execSync(cmd, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 15000 }); } catch { return ""; } }
 function readFileSafe(p) { try { return fs.readFileSync(p, "utf8"); } catch { return null; } }
 function warn(m) { if (!opt.json) process.stderr.write(`  ! ${m}\n`); }
+
+// SHA256 fingerprint of a single authorized_keys line, via a private temp file
+// (mode 0600 in a mkdtemp dir — never a predictable world-readable /tmp path).
+function keyFingerprint(key) {
+  let dir = null;
+  try {
+    dir = fs.mkdtempSync(`${os.tmpdir()}/kaali-`);
+    const kp = `${dir}/k`;
+    fs.writeFileSync(kp, key, { mode: 0o600 });
+    return (sh(`ssh-keygen -lf ${kp} 2>/dev/null`) || "").trim().split(/\s+/)[1] || "";
+  } catch { return ""; }
+  finally { if (dir) try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* */ } }
+}
 
 // Distro system users we don't flag (uid < 1000, no login shell expected).
 const SHELL_LOGIN = /\/(bash|sh|zsh|ash|dash|fish|ksh)$/;
@@ -138,13 +163,8 @@ function scanSSH() {
       if (!content) continue;
       const keys = content.split("\n").filter((l) => l.trim() && !l.trim().startsWith("#"));
       for (const key of keys) {
-        // fingerprint via ssh-keygen if available
-        let fp = "";
-        try {
-          fs.writeFileSync("/tmp/.kaali_k", key);
-          fp = (sh("ssh-keygen -lf /tmp/.kaali_k 2>/dev/null") || "").trim().split(/\s+/)[1] || "";
-          fs.unlinkSync("/tmp/.kaali_k");
-        } catch { /* */ }
+        // fingerprint via ssh-keygen if available (write to a private temp dir, 0600)
+        const fp = keyFingerprint(key);
         const comment = key.trim().split(/\s+/).slice(2).join(" ") || "(no comment)";
         if (fp && ALLOW.ssh_key_fingerprints.includes(fp)) continue;
         finding("high", `SSH authorized key in ${kf}`,
@@ -239,6 +259,110 @@ function scanFiles() {
     const base = p.split("/").pop();
     if (!knownSuid.has(base))
       finding("high", `Unexpected SUID-root binary: ${p}`, "A setuid-root binary outside the standard set can be a privilege backdoor.", p, "Verify the package owns it (dpkg -S / rpm -qf). If not, remove it.");
+  }
+}
+
+// =====================================================================
+// 5b. CONTAINERS — over-privileged / malicious docker & podman.
+//     The pakchoi incident persisted via amco_* containers set to
+//     restart automatically. host-scan was previously blind to this.
+// =====================================================================
+function containerRuntimes() {
+  const rts = [];
+  for (const rt of ["docker", "podman"]) if (sh(`command -v ${rt} 2>/dev/null`).trim()) rts.push(rt);
+  return rts;
+}
+
+function scanContainers() {
+  const runtimes = containerRuntimes();
+  if (!runtimes.length) return; // no container runtime installed — nothing to do
+
+  // (0) The Docker socket itself: group/other write = trivial host takeover.
+  for (const sock of ["/var/run/docker.sock", "/run/docker.sock"]) {
+    try {
+      const st = fs.statSync(sock);
+      const mode = st.mode & 0o777;
+      if (mode & 0o022) // group- or other-writable
+        finding("critical", `Docker socket is world/group-writable (${mode.toString(8)})`,
+          "Anyone who can write /var/run/docker.sock can launch a privileged container and become root on the host.",
+          `${sock} mode=${mode.toString(8)}`,
+          "Restrict to root:docker mode 0660; keep only trusted admins in the 'docker' group.");
+    } catch { /* socket not present */ }
+  }
+
+  for (const rt of runtimes) {
+    const ids = sh(`${rt} ps -aq 2>/dev/null`).trim();
+    if (!ids) continue;
+    let arr = [];
+    try { arr = JSON.parse(sh(`${rt} inspect ${ids.split("\n").join(" ")} 2>/dev/null`) || "[]"); }
+    catch { arr = []; }
+
+    for (const c of arr) {
+      const name = (c.Name || "").replace(/^\//, "") || String(c.Id || "").slice(0, 12);
+      const image = (c.Config && c.Config.Image) || c.ImageName || "?";
+      const hc = c.HostConfig || {};
+      const running = !!(c.State && c.State.Running);
+      const knownImg = ALLOW.container_images.some((g) => g && image.startsWith(g));
+      const knownName = ALLOW.containers.includes(name);
+      const label = `${name} · image=${image}${running ? " · running" : ""} · via ${rt}`;
+
+      // Collect every host path this container mounts (Mounts + raw Binds), deduped.
+      const mountSrcs = [...new Set([
+        ...((c.Mounts || []).map((m) => m.Source || "")),
+        ...((hc.Binds || []).map((b) => String(b || "").split(":")[0])),
+      ].filter(Boolean))];
+
+      // (a) Docker socket mounted INTO a container = container→host root escape.
+      if (mountSrcs.some((s) => /docker\.sock$/.test(s)))
+        finding("critical", `Container mounts the Docker socket: ${name}`,
+          "A container holding /var/run/docker.sock can spawn a privileged sibling container and take over the host.",
+          label, `Remove the docker.sock bind unless this is a trusted orchestrator. Inspect: ${rt} inspect ${name}`);
+
+      // (b) Host root or sensitive host paths bind-mounted in.
+      for (const s of mountSrcs)
+        if (s === "/" || /^\/(etc|root|boot|run|var\/run)$/.test(s))
+          finding("critical", `Container bind-mounts a sensitive host path: ${name}`,
+            "Mounting the host root or /etc//root into a container is a direct host-compromise path.",
+            `${label} · host-path=${s}`, `Narrow or remove the mount for ${name}.`);
+
+      // (c) Privileged / host namespaces / dangerous capabilities.
+      if (hc.Privileged)
+        finding("critical", `Privileged container: ${name}`,
+          "--privileged removes container isolation — effectively root on the host.",
+          label, `Re-run without --privileged; grant only the specific caps needed.`);
+      if (hc.NetworkMode === "host")
+        finding("high", `Container shares the host network: ${name}`,
+          "network=host removes network isolation and exposes every host interface to the container.",
+          label, `Use a bridge network with explicit -p port mappings.`);
+      if (hc.PidMode === "host")
+        finding("high", `Container shares the host PID namespace: ${name}`,
+          "pid=host lets the container see, trace and signal host processes.", label, `Drop --pid=host.`);
+      const dangerCaps = (hc.CapAdd || []).filter((cap) => /^(ALL|SYS_ADMIN|SYS_PTRACE|SYS_MODULE|DAC_READ_SEARCH|BPF)$/i.test(cap));
+      if (dangerCaps.length)
+        finding("high", `Container has host-escape capabilities: ${name}`,
+          `Added caps: ${dangerCaps.join(", ")} — each can be leveraged to break out.`, label, `Drop these caps unless strictly required.`);
+
+      // (d) Persistence: an un-allowlisted container set to auto-restart (the amco_* pattern).
+      const restart = (hc.RestartPolicy && hc.RestartPolicy.Name) || "";
+      if (/^(always|unless-stopped)$/.test(restart) && !knownImg && !knownName)
+        finding("high", `Unknown auto-restarting container: ${name}`,
+          "A container you haven't allowlisted is set to restart automatically — exactly how malicious containers (e.g. amco_*) survive reboots.",
+          `${label} · restart=${restart}`, `Confirm you deployed this. If not: ${rt} rm -f ${name}, then find how it was created.`);
+
+      // (e) Malicious entrypoint / command.
+      const cmd = [].concat((c.Config && c.Config.Entrypoint) || [], (c.Config && c.Config.Cmd) || []).join(" ");
+      if (/(curl|wget)\b.*\|\s*(sh|bash)|base64\s+-d|\/dev\/shm|xmrig|minerd|kinsing|\bnc\b\s|\/dev\/tcp\//i.test(cmd))
+        finding("critical", `Container with a malicious entrypoint: ${name}`,
+          "The container command matches a download-exec / miner / reverse-shell pattern.",
+          `${label} · cmd=${cmd.slice(0, 120)}`, `Stop + remove ${name}; capture the image (${rt} save) for analysis.`);
+
+      // (f) If you've set a container allowlist, flag anything running outside it.
+      const allowlisted = knownImg || knownName;
+      if (running && !allowlisted && (ALLOW.containers.length || ALLOW.container_images.length))
+        finding("medium", `Unrecognised running container: ${name}`,
+          "This container matches neither your allowlisted names nor trusted image prefixes.", label,
+          `If it's yours, add it to allow.json (containers / container_images). If not, investigate.`);
+    }
   }
 }
 
@@ -448,13 +572,118 @@ function scanRecentBinaries() {
 }
 
 // =====================================================================
+// BASELINE — snapshot the security-relevant state, then alert on anything
+// NEW since a known-good baseline. This is the highest-signal detector:
+// a fresh compromise shows up first as a *new* user / key / port / unit /
+// container that wasn't there before — regardless of how stealthy it is.
+// =====================================================================
+function collectState() {
+  const state = { uid0: [], login_users: [], ssh_fps: [], listen_ports: [], units: [], timers: [], containers: [], suid: [] };
+
+  // users: every UID-0 account + every account with a real login shell
+  const passwd = readFileSafe("/etc/passwd") || "";
+  for (const line of passwd.split("\n")) {
+    if (!line.trim()) continue;
+    const [name, , uidStr, , , , shell] = line.split(":");
+    const uid = parseInt(uidStr, 10);
+    if (!name || Number.isNaN(uid)) continue;
+    if (uid === 0) state.uid0.push(name);
+    if (SHELL_LOGIN.test(shell || "")) state.login_users.push(`${name}:${uid}`);
+  }
+
+  // ssh authorized-key fingerprints across root + all homes
+  const homes = ["/root"];
+  try { for (const d of fs.readdirSync("/home")) homes.push(`/home/${d}`); } catch { /* */ }
+  for (const home of homes) {
+    const content = readFileSafe(`${home}/.ssh/authorized_keys`);
+    if (!content) continue;
+    for (const key of content.split("\n")) {
+      if (!key.trim() || key.trim().startsWith("#")) continue;
+      const fp = keyFingerprint(key);
+      if (fp) state.ssh_fps.push(fp);
+    }
+  }
+
+  // listening ports
+  const listen = sh("ss -tlnH 2>/dev/null") || sh("ss -tln 2>/dev/null") || sh("netstat -tln 2>/dev/null");
+  for (const line of listen.split("\n")) { const m = line.match(/:(\d+)\s/); if (m) state.listen_ports.push(parseInt(m[1], 10)); }
+  state.listen_ports = [...new Set(state.listen_ports)].sort((a, b) => a - b);
+
+  // enabled systemd units + timers
+  const en = sh("systemctl list-unit-files --state=enabled --no-legend --no-pager 2>/dev/null");
+  for (const line of en.split("\n")) {
+    const u = line.trim().split(/\s+/)[0];
+    if (!u) continue;
+    if (u.endsWith(".service")) state.units.push(u);
+    else if (u.endsWith(".timer")) state.timers.push(u);
+  }
+
+  // containers (name + image)
+  for (const rt of containerRuntimes()) {
+    const out = sh(`${rt} ps -a --format "{{.Names}} {{.Image}}" 2>/dev/null`);
+    for (const line of out.split("\n")) if (line.trim()) state.containers.push(line.trim());
+  }
+
+  // SUID-root binaries in the usual system dirs (fast fingerprint, not full /home walk)
+  state.suid = sh("find /usr /bin /sbin /opt -perm -4000 -type f 2>/dev/null").split("\n").filter(Boolean);
+
+  for (const k of ["uid0", "login_users", "ssh_fps", "units", "timers", "containers", "suid"]) state[k] = [...new Set(state[k])].sort();
+  return state;
+}
+
+function diffBaseline(base, cur) {
+  const cats = {
+    uid0:        ["critical", "NEW root-privileged account since baseline"],
+    login_users: ["high",     "NEW login-capable account since baseline"],
+    ssh_fps:     ["high",     "NEW SSH authorized key since baseline"],
+    containers:  ["high",     "NEW container since baseline"],
+    units:       ["high",     "NEW enabled systemd unit since baseline"],
+    timers:      ["high",     "NEW enabled systemd timer since baseline"],
+    suid:        ["high",     "NEW SUID-root binary since baseline"],
+    listen_ports:["medium",   "NEW listening port since baseline"],
+  };
+  for (const key of Object.keys(cats)) {
+    const before = new Set((base[key] || []).map(String));
+    for (const item of (cur[key] || [])) {
+      if (before.has(String(item))) continue;
+      const [sev, title] = cats[key];
+      finding(sev, `${title}: ${item}`,
+        "A security-relevant item appeared after your known-good baseline — this is how a fresh intrusion (new user, key, port, unit, or container) first surfaces, even a stealthy one.",
+        `${key}: ${item}`,
+        "If you made this change, re-baseline: host-scan.js --save-baseline. If not, treat it as a possible compromise and investigate.");
+    }
+  }
+}
+
+// Establish or compare a baseline; returns a short status note for the report.
+function handleBaseline() {
+  if (!opt.baselinePath) return null;
+  let cur;
+  try { cur = collectState(); } catch (e) { warn(`baseline state collection failed: ${e.message}`); return null; }
+  const prev = readFileSafe(opt.baselinePath);
+  if (opt.saveBaseline || !prev) {
+    try {
+      const dir = opt.baselinePath.replace(/\/[^/]+$/, "");
+      if (dir) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(opt.baselinePath, JSON.stringify({ saved_at: new Date().toISOString(), host: os.hostname(), state: cur }, null, 2), { mode: 0o600 });
+      finding("info", prev ? "Baseline re-saved" : "Baseline established",
+        `Known-good snapshot written to ${opt.baselinePath}. Future scans alert on any new user, key, port, unit, or container.`);
+    } catch (e) { warn(`could not write baseline ${opt.baselinePath}: ${e.message}`); }
+    return null;
+  }
+  try { diffBaseline(JSON.parse(prev).state || {}, cur); }
+  catch (e) { warn(`baseline compare failed: ${e.message}`); }
+  return null;
+}
+
+// =====================================================================
 // run + report
 // =====================================================================
 function run() {
   if (!isRoot) warn("not running as root — /etc/shadow, some logs, and full process info are unavailable. Re-run with sudo for complete coverage.");
   const mods = [
     ["users", scanUsers], ["ssh", scanSSH], ["persistence", scanPersistence],
-    ["runtime", scanRuntime], ["files", scanFiles], ["logs", scanLogs],
+    ["runtime", scanRuntime], ["files", scanFiles], ["containers", scanContainers], ["logs", scanLogs],
     // deep modules
     ["pam", scanPAM], ["sudoers", scanSudoers], ["kernel-modules", scanKernelModules],
     ["shell-init", scanShellInit], ["schedulers", scanScheduledExtra], ["motd", scanMOTD],
@@ -464,6 +693,9 @@ function run() {
   for (const [name, fn] of mods) {
     try { fn(); } catch (e) { finding("info", `Scanner '${name}' errored`, String(e.message || e)); }
   }
+
+  // Baseline drift (highest-signal): establish on first run, else alert on anything new.
+  try { handleBaseline(); } catch (e) { finding("info", "Baseline step errored", String(e.message || e)); }
 
   findings.sort((a, b) => SEV[b.severity] - SEV[a.severity]);
   const counts = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };

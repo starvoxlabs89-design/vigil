@@ -17,7 +17,9 @@ No install, no dependencies, single file. Node ≥18 (already on any box running
 | **persistence** | `/etc/ld.so.preload` rootkit · malicious cron (`curl\|sh`, `/tmp`, base64) · `rc.local` · systemd services running from `/tmp`, `/dev/shm`, hidden home paths |
 | **runtime** | Processes executing from `/tmp` · `/dev/shm` · known miners (xmrig, kinsing…) · unexpected listening ports |
 | **files** | SUID-root binaries outside the standard set (privilege backdoors) |
+| **containers** | Docker/Podman: socket mounted into a container · host-root/`/etc` bind-mounts · `--privileged` · `network=host` / `pid=host` · host-escape caps (SYS_ADMIN…) · **un-allowlisted auto-restart containers (the `amco_*` persistence pattern)** · miner/reverse-shell entrypoints · a world-writable `docker.sock` |
 | **logs** | Successful **root** password logins · heavy brute-forcing · a summary of every source IP that successfully logged in (spot the unfamiliar one) |
+| **baseline** | **Anything security-relevant that appeared since your known-good snapshot** — a new UID-0 user, SSH key, listening port, enabled unit/timer, container, or SUID binary. Catches stealthy persistence the pattern-matchers miss. |
 
 Each finding has a severity, the evidence, and the exact remediation command.
 
@@ -27,8 +29,23 @@ Each finding has a severity, the evidence, and the exact remediation command.
 sudo node host-scan.js                          # terminal report
 sudo node host-scan.js --json > scan.json       # machine-readable
 sudo node host-scan.js --cloud-key k_live_...    # also stream to kaali.io dashboard
-sudo node host-scan.js --allow ./allow.json      # baseline allowlist (silence known-good)
+sudo node host-scan.js --allow ./allow.json      # allowlist (silence known-good)
+sudo node host-scan.js --save-baseline           # record today's state as known-good
+sudo node host-scan.js --baseline /var/lib/kaali/baseline.json   # alert on drift since baseline
 ```
+
+### Baseline drift — the highest-signal detector
+
+Heuristics catch *known-bad* patterns; a baseline catches **anything new**, however stealthy. Take one snapshot on a clean box, then let every later scan diff against it:
+
+```bash
+# once, right after a clean rebuild:
+sudo node host-scan.js --save-baseline
+# thereafter (this is what the timer runs):
+sudo node host-scan.js --baseline /var/lib/kaali/baseline.json
+```
+
+A rogue `pakchoi` UID-0 account, a new SSH key, a fresh `amco_*` container, or an unexpected listening port then shows up immediately as **`NEW … since baseline`** — no signature required. Re-run `--save-baseline` after any legitimate change.
 
 Exit code `2` if any critical/high finding (so it fails CI / alerts a cron wrapper), else `0`.
 
