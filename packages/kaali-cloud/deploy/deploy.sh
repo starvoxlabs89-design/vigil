@@ -21,6 +21,15 @@ DB_USER="${DB_USER:-kaali}"
 CERT_HOSTS=(-d "$PRIMARY_HOST" -d "www.$PRIMARY_HOST" -d "$APP_HOST" -d "$API_HOST")
 CERT_DIR="/etc/letsencrypt/live/$PRIMARY_HOST"
 
+# External DB (Supabase): pass DATABASE_URL to put the userbase on Supabase and
+# skip local Postgres entirely. Use the Supabase *Session pooler* string
+# (…pooler.supabase.com:5432). Example:
+#   DATABASE_URL='postgresql://postgres.ref:PW@aws-0-ap-south-1.pooler.supabase.com:5432/postgres' \
+#     curl -fsSL …/deploy.sh | sudo -E bash
+DATABASE_URL="${DATABASE_URL:-}"
+DATABASE_SSL="${DATABASE_SSL:-}"
+EXTERNAL_DB=0; [[ -n "$DATABASE_URL" ]] && EXTERNAL_DB=1
+
 step() { printf "\n\033[1;36m➤ %s\033[0m\n" "$*"; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
@@ -30,7 +39,9 @@ if ! have node || [[ "$(node -v)" != v20.* && "$(node -v)" != v21.* && "$(node -
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
   apt-get install -y nodejs
 fi
-apt-get install -y postgresql nginx certbot python3-certbot-nginx git
+PKGS="nginx certbot python3-certbot-nginx git"
+[[ $EXTERNAL_DB -eq 0 ]] && PKGS="postgresql $PKGS"   # no local Postgres in Supabase mode
+apt-get install -y $PKGS
 
 # --- 2. User + code ----------------------------------------------------------
 step "Creating service user + fetching code"
@@ -45,72 +56,90 @@ fi
 APP_DIR="$INSTALL_DIR/kaali/packages/kaali-cloud"
 sudo -u "$SVC_USER" bash -lc "cd '$APP_DIR' && npm install --omit=dev --silent"
 
-# --- 3. Postgres -------------------------------------------------------------
-step "Configuring Postgres role + database"
-if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then
-  DB_PASS=$(openssl rand -hex 24)
-  sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
-  echo "DB_PASS=$DB_PASS" > "$APP_DIR/.db_credentials"
-  chown "$SVC_USER:$SVC_USER" "$APP_DIR/.db_credentials"
-  chmod 600 "$APP_DIR/.db_credentials"
-  echo "  → generated DB password saved to $APP_DIR/.db_credentials"
-fi
-if ! sudo -u postgres psql -lqt | cut -d\| -f1 | grep -qw "$DB_NAME"; then
-  sudo -u postgres createdb -O "$DB_USER" "$DB_NAME"
-fi
+# --- 3. Database -------------------------------------------------------------
+if [[ $EXTERNAL_DB -eq 1 ]]; then
+  step "Using external Postgres (Supabase) — skipping local DB setup"
+  echo "  DATABASE_URL host → $(printf '%s' "$DATABASE_URL" | sed -E 's,^[^@]*@,,; s,/.*$,,')"
+  # Migrations are applied after .env is written (step 4b), via the app's own
+  # migrate.js — it connects with the pg client + SSL (see src/db.js).
+else
+  step "Configuring local Postgres role + database"
+  if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then
+    DB_PASS=$(openssl rand -hex 24)
+    sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
+    echo "DB_PASS=$DB_PASS" > "$APP_DIR/.db_credentials"
+    chown "$SVC_USER:$SVC_USER" "$APP_DIR/.db_credentials"
+    chmod 600 "$APP_DIR/.db_credentials"
+    echo "  → generated DB password saved to $APP_DIR/.db_credentials"
+  fi
+  if ! sudo -u postgres psql -lqt | cut -d\| -f1 | grep -qw "$DB_NAME"; then
+    sudo -u postgres createdb -O "$DB_USER" "$DB_NAME"
+  fi
 
-step "Applying migrations"
-# Pipe SQL via stdin so the `postgres` OS user doesn't need to traverse the
-# kaali user's home dir (which is 750). Migrations are idempotent
-# (CREATE TABLE IF NOT EXISTS + ALTER … DROP NOT NULL is safe on re-run).
-for f in "$APP_DIR"/migrations/*.sql; do
-  echo "  applying $(basename "$f")"
-  cat "$f" | sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 >/dev/null
-done
+  step "Applying migrations (local)"
+  # Pipe SQL via stdin so the `postgres` OS user doesn't need to traverse the
+  # kaali user's home dir (which is 750). Migrations are idempotent.
+  for f in "$APP_DIR"/migrations/*.sql; do
+    echo "  applying $(basename "$f")"
+    cat "$f" | sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 >/dev/null
+  done
 
-# Migrations run as the `postgres` superuser, which means tables/sequences are
-# owned by postgres by default and the app-role has no privileges. Grant them
-# explicitly, and set default privileges so future migrations inherit access.
-step "Granting privileges to $DB_USER"
-sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 >/dev/null <<SQL
+  # Tables are owned by postgres; grant the app-role access + default privileges.
+  step "Granting privileges to $DB_USER"
+  sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 >/dev/null <<SQL
 GRANT USAGE, CREATE ON SCHEMA public TO $DB_USER;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $DB_USER;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $DB_USER;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO $DB_USER;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO $DB_USER;
 SQL
+fi
 
 # --- 4. .env -----------------------------------------------------------------
 step "Ensuring .env"
 if [[ ! -f "$APP_DIR/.env" ]]; then
-  DB_PASS_LINE=$(cat "$APP_DIR/.db_credentials" 2>/dev/null || echo "DB_PASS=CHANGE_ME")
-  DB_PASS_VAL=${DB_PASS_LINE#DB_PASS=}
-  cat > "$APP_DIR/.env" <<EOF
-PORT=4842
-PUBLIC_URL=https://$PRIMARY_HOST
-DASHBOARD_URL=https://$PRIMARY_HOST
-DATABASE_URL=postgres://$DB_USER:$DB_PASS_VAL@127.0.0.1:5432/$DB_NAME
-SESSION_SECRET=$(openssl rand -hex 32)
-CSRF_SECRET=$(openssl rand -hex 32)
-COOKIE_SECURE=1
-
-# Fill these before restart:
-# Seeds the first admin account on boot (use your email):
-KAALI_BOOTSTRAP_ADMIN_EMAIL=
-RESEND_API_KEY=
-EMAIL_FROM=Kaali <noreply@$PRIMARY_HOST>
-# OAuth redirect URI to register: https://$PRIMARY_HOST/auth/google/callback
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-# OAuth redirect URI to register: https://$PRIMARY_HOST/auth/meta/callback
-META_APP_ID=
-META_APP_SECRET=
-EOF
+  if [[ $EXTERNAL_DB -eq 1 ]]; then
+    DB_URL_LINE="$DATABASE_URL"
+  else
+    DB_PASS_LINE=$(cat "$APP_DIR/.db_credentials" 2>/dev/null || echo "DB_PASS=CHANGE_ME")
+    DB_URL_LINE="postgres://$DB_USER:${DB_PASS_LINE#DB_PASS=}@127.0.0.1:5432/$DB_NAME"
+  fi
+  # Written line-by-line (printf %s for the URL) so a Supabase password with
+  # shell-special chars ($, `, etc.) is never mangled by heredoc expansion.
+  {
+    echo "PORT=4842"
+    echo "PUBLIC_URL=https://$PRIMARY_HOST"
+    echo "DASHBOARD_URL=https://$PRIMARY_HOST"
+    printf 'DATABASE_URL=%s\n' "$DB_URL_LINE"
+    [[ $EXTERNAL_DB -eq 1 ]] && echo "DATABASE_SSL=${DATABASE_SSL:-require}"
+    echo "SESSION_SECRET=$(openssl rand -hex 32)"
+    echo "CSRF_SECRET=$(openssl rand -hex 32)"
+    echo "COOKIE_SECURE=1"
+    echo ""
+    echo "# Fill these before restart:"
+    echo "# Seeds the first admin account on boot (use your email):"
+    echo "KAALI_BOOTSTRAP_ADMIN_EMAIL="
+    echo "RESEND_API_KEY="
+    echo "EMAIL_FROM=Kaali <noreply@$PRIMARY_HOST>"
+    echo "# OAuth redirect URI to register: https://$PRIMARY_HOST/auth/google/callback"
+    echo "GOOGLE_CLIENT_ID="
+    echo "GOOGLE_CLIENT_SECRET="
+    echo "# OAuth redirect URI to register: https://$PRIMARY_HOST/auth/meta/callback"
+    echo "META_APP_ID="
+    echo "META_APP_SECRET="
+  } > "$APP_DIR/.env"
   chown "$SVC_USER:$SVC_USER" "$APP_DIR/.env"
   chmod 600 "$APP_DIR/.env"
-  echo "  → generated $APP_DIR/.env — edit RESEND_API_KEY + OAuth keys, then re-run OR restart service."
+  echo "  → generated $APP_DIR/.env"
 else
   echo "  → $APP_DIR/.env exists, leaving alone"
+fi
+
+# --- 4b. Migrations for external DB (Supabase) via the app's own migrator -----
+if [[ $EXTERNAL_DB -eq 1 ]]; then
+  step "Applying migrations to Supabase"
+  sudo -u "$SVC_USER" DATABASE_URL="$DATABASE_URL" DATABASE_SSL="${DATABASE_SSL:-require}" \
+    bash -lc "cd '$APP_DIR' && node src/migrate.js"
 fi
 
 # --- 5. systemd --------------------------------------------------------------
